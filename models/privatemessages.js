@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
   privateMessages.associate = function (models) {
     // associations can be defined here
     privateMessages.belongsTo(models.User)
-
+    privateMessages.belongsTo(models.Rooms)
   };
   return privateMessages;
 };
