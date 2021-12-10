@@ -4,16 +4,7 @@ const routes = require('./routes')
 const cors = require('cors')
 const app = express()
 const port = process.env.PORT || 3000
-const { Server } = require("socket.io");
-const io = new Server();
-
-io.on("connection", (socket) => {
-  socket.emit("chat_Msg", { some: "data" });
-
-  socket.emit("chat_Msg", (data) => {
-    console.log(data); // data will be "woot"
-  });
-});
+const server = require("http").createServer(app);
 
 app.use(cors())
 if (process.env.NODE_ENV !== "production") {
@@ -29,11 +20,13 @@ function authenticated(req, res, next) {
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
-
 app.use(passport.initialize())
-
-app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 app.use(routes)
+
+require('./socket/socket')(server)
+
+server.listen(port, () => console.log(`Example app listening on port ${port}!`))
+
 
 
 module.exports = app

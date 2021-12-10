@@ -8,6 +8,8 @@ const replyController = require('../controllers/replyController')
 const likeController = require('../controllers/likeController')
 const followController = require('../controllers/followController')
 const adminController = require('../controllers/adminController')
+const socketController = require('../controllers/socketController')
+
 const multer = require('multer')
 const upload = multer({ dest: 'temp/' })
 const cors = require('cors')
@@ -103,6 +105,11 @@ router.get('/api/admin/users', authenticated, authenticatedAdmin, adminControlle
 router.post('/api/admin/signin', userController.adminSignIn)
 router.get('/api/admin/tweets', authenticated, authenticatedAdmin, adminController.getAdminTweets)
 router.delete('/api/admin/tweets/:id', authenticated, authenticatedAdmin, adminController.deleteTweet)
+
+
+
+//socket相關
+router.get('/socket_message', socketController.getMessages)
 
 module.exports = router
 
