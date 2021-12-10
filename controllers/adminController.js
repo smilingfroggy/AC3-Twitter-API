@@ -3,8 +3,7 @@ const User = db.User
 const Tweet = db.Tweet
 const Like = db.Like
 const Reply = db.Reply
-const sequelize = require('sequelize')
-const { Op } = require("sequelize");
+
 
 const adminController = {
   getUsers: (req, res) => {
@@ -47,11 +46,11 @@ const adminController = {
   deleteTweet: (req, res) => {
     const TweetId = req.params.id
     Promise.all([
-      Tweet.destroy({ where: { id: TweetId }}),
-      Like.destroy({ where: { TweetId }}),
-      Reply.destroy({ where: { TweetId }})
+      Tweet.destroy({ where: { id: TweetId } }),
+      Like.destroy({ where: { TweetId } }),
+      Reply.destroy({ where: { TweetId } })
     ])
-      .then(([ tweet, like, reply ]) => {
+      .then(([tweet, like, reply]) => {
         // console.log([ tweet, like, reply ])
         if (tweet === 1) {  //確實有刪除成功
           return res.json({ status: 'success', message: '刪除成功' })
