@@ -6,8 +6,10 @@ module.exports = (sequelize, DataTypes) => {
     RecieverId: DataTypes.INTEGER,
     RoomId: DataTypes.INTEGER
   }, {});
-  privateMessages.associate = function(models) {
+  privateMessages.associate = function (models) {
     // associations can be defined here
+    privateMessages.belongsTo(models.User)
+
   };
   return privateMessages;
 };
