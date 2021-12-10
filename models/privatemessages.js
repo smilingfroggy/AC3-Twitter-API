@@ -1,15 +1,15 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-  const privateMessages = sequelize.define('privateMessages', {
+  const PrivateMessage = sequelize.define('PrivateMessage', {
     id: DataTypes.INTEGER,
     SenderId: DataTypes.INTEGER,
     RecieverId: DataTypes.INTEGER,
     RoomId: DataTypes.INTEGER
   }, {});
-  privateMessages.associate = function (models) {
+  PrivateMessage.associate = function (models) {
     // associations can be defined here
-    privateMessages.belongsTo(models.User)
-    privateMessages.belongsTo(models.Rooms)
+    PrivateMessage.belongsTo(models.User)
+    PrivateMessage.belongsTo(models.Room)
   };
-  return privateMessages;
+  return PrivateMessage;
 };

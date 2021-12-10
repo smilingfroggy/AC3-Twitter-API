@@ -1,13 +1,13 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-  const publicMessages = sequelize.define('publicMessages', {
+  const PublicMessage = sequelize.define('PublicMessage', {
     id: DataTypes.INTEGER,
     userId: DataTypes.INTEGER,
     content: DataTypes.STRING
   }, {});
-  publicMessages.associate = function (models) {
+  PublicMessage.associate = function (models) {
     // associations can be defined here
-    publicMessages.belongsTo(models.User)
+    PublicMessage.belongsTo(models.User)
   };
-  return publicMessages;
+  return PublicMessage;
 };

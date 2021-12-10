@@ -1,13 +1,13 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
-  const rooms = sequelize.define('rooms', {
+  const Room = sequelize.define('Room', {
     id: DataTypes.INTEGER,
     USerId: DataTypes.INTEGER,
     UserId2: DataTypes.INTEGER
   }, {});
-  rooms.associate = function (models) {
+  Room.associate = function (models) {
     // associations can be defined here
-    rooms.hasMany(models.privateMessages)
+    Room.hasMany(models.PrivateMessage)
   };
-  return rooms;
+  return Room;
 };
