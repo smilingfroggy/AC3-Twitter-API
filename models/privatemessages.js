@@ -1,7 +1,6 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
   const PrivateMessage = sequelize.define('PrivateMessage', {
-    id: DataTypes.INTEGER,
     SenderId: DataTypes.INTEGER,
     RecieverId: DataTypes.INTEGER,
     RoomId: DataTypes.INTEGER

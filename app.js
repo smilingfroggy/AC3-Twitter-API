@@ -4,7 +4,16 @@ const routes = require('./routes')
 const cors = require('cors')
 const app = express()
 const port = process.env.PORT || 3000
+const { Server } = require("socket.io");
+const io = new Server();
 
+io.on("connection", (socket) => {
+  socket.emit("chat_Msg", { some: "data" });
+
+  socket.emit("chat_Msg", (data) => {
+    console.log(data); // data will be "woot"
+  });
+});
 
 app.use(cors())
 if (process.env.NODE_ENV !== "production") {
