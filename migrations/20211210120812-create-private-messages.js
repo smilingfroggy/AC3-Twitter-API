@@ -1,20 +1,17 @@
 'use strict';
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable('privateMessages', {
+    return queryInterface.createTable('PrivateMessages', {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      id: {
+      senderId: {
         type: Sequelize.INTEGER
       },
-      SenderId: {
-        type: Sequelize.INTEGER
-      },
-      RecieverId: {
+      receiverId: {
         type: Sequelize.INTEGER
       },
       RoomId: {
@@ -31,6 +28,6 @@ module.exports = {
     });
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable('privateMessages');
+    return queryInterface.dropTable('PrivateMessages');
   }
 };
