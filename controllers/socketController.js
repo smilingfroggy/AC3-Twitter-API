@@ -9,7 +9,7 @@ const socketController = {
     return User.findByPk(UserId, {
       attributes: ['id', 'name', 'avatar', 'account']
     }).then(user => {
-      PrivateMessage.create({   //待確認是否儲存成功
+      PublicMessage.create({   //待確認是否儲存成功
         UserId,
         content: "上線",
         type: "notice"
@@ -21,8 +21,6 @@ const socketController = {
     })
   },
   savePublicMessages: (data) => { //輸入格式待確認：type要存?
-    // { name: "Majer", content: "吃早餐", id: 1, type: "message" }
-    // const content = messages.content 解構賦值
     const { content, id } = data
     return Promise.all([
       PublicMessage.create({
