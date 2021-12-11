@@ -9,7 +9,7 @@ const socketController = {
     return User.findByPk(UserId, {
       attributes: ['id', 'name', 'avatar', 'account']
     }).then(user => {
-      PrivateMessage.create({   //待確認是否儲存成功
+      PublicMessage.create({   //待確認是否儲存成功
         UserId,
         content: "上線",
         type: "notice"
@@ -20,13 +20,17 @@ const socketController = {
       return user
     })
   },
-  savePublicMessages: (messages) => { //輸入格式待確認：type要存?
-    // { name: "Majer", content: "吃早餐", id: 1, type: "message" }
-    // const content = messages.content 解構賦值
-    const { content, UserId, type } = messages
-    return PublicMessage.create({
-      content, UserId, // type
-    })
+  savePublicMessages: (data) => { //輸入格式待確認：type要存?
+    const { content, id } = data
+    return Promise.all([
+      PublicMessage.create({
+        content, UserId: id, // type
+      }),
+      User.findByPk(id, {
+        attributes: ['id', 'name', 'avatar', 'account']
+      })
+    ])
+      .then(([newMessages, user]) => { return ([newMessages, user]) })
   },
   savePrivateMessages: (messages) => { //輸入格式待確認：傳入roomId? type要存?
     // { name: "Majer", content: "吃早餐", id: 1, type: "message" }
@@ -45,7 +49,11 @@ const socketController = {
     })
       .then(messages => {
         console.log(messages)
-        return messages
+        const sampleMessages = [
+          { content: "阿囉哈", createdAt: "2021-12-10 03:46:51", User: { id: 1, account: 'JENNY', name: 'JEN', avatar: '' } },
+          { content: "晚餐吃甚麼？", createdAt: "2021-12-11 03:46:51", User: { id: 2, account: 'JENNY', name: 'JEN', avatar: '' } }
+        ]
+        return sampleMessages
       })
   },
   getRoomId: (UserId, UserId2) => {   //建立新 private room
