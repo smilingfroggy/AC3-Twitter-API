@@ -41,9 +41,17 @@ module.exports = (server) => {
     //data= userId1, userId2
     socket.on("privateEnter", async (data) => {
       const roomId = await socketController.getRoomId(data)
-      const user = await socketController.getUser(id)
-      socket.join(`${roomId}`);
-      socket.to(`${roomId}`).emit('join_privateroom', roomId, user, history);
+      const user1 = await socketController.getUser(data[0])   //data 資料格式？假設 [userId1, userId2]
+      const user2 = await socketController.getUser(data[1])
+      const history = await socketController.getPrivateMessages(roomId)
+      socket.join(roomId);
+      let results = {}
+      results.roomId = roomId
+      results.user1 = user1
+      results.user2 = user2
+      results.history = history
+      // socket.to(`${roomId}`).emit('join_privateroom', roomId, user1, user2, history);
+      socket.to(roomId).emit('join_privateroom', results);
     });
 
     /* socket.on("privateLeave", async (data) => {
@@ -56,9 +64,11 @@ module.exports = (server) => {
     //data= userId1, userId2, content
     socket.on("privateMessage", async (data) => {
       const roomId = await socketController.getRoomId(data)
-      const user = await socketController.getUser(id)
-      const newMessage = await socketController.savePrivateMessages(data)
-      socket.to(`${roomId}`).emit("privateMessage", newMessage, roomId, user);
+      const sender = await socketController.getUser(data.senderId)   //data 資料格式？假設{ senderId: NUMBER, receiverId: NUMBER, content: STRING}
+      const receiver = await socketController.getUser(data.receiverId)
+      const newMessage = await socketController.savePrivateMessages(roomId)
+      // socket.to(roomId).emit("privateMessage", newMessage, roomId, sender, receiver);   //TODO 整理資料
+      socket.to(roomId).emit("privateMessage", newMessage);
     });
 
 
