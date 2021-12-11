@@ -1,8 +1,7 @@
 const socketController = require('../controllers/socketController')
 const { generateMessage } = require('./message')
 const socket = require("socket.io");
-const listeners = socket.listenersAny();
-const onlineUsers = []
+const onlineUsers = []    // const listeners = socket.listenersAny();
 module.exports = (server) => {
 
   const io = socket(server, {
@@ -55,7 +54,7 @@ module.exports = (server) => {
      });*/
 
     //data= userId1, userId2, content
-    socket.on("privateMessage", (data) => {
+    socket.on("privateMessage", async (data) => {
       const roomId = await socketController.getRoomId(data)
       const user = await socketController.getUser(id)
       const newMessage = await socketController.savePrivateMessages(data)

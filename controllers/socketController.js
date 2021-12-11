@@ -60,10 +60,10 @@ const socketController = {
         attributes: ['id', 'name', 'avatar', 'account']
       })
     ])
-      .then(([newMessages, user]) => {
+      .then(([privateMessages, user]) => {
         user = user.toJSON()
         const newMessages = { room: RoomId }  // 外面再包一個roomID
-        newMessages.room.newMessages = newMessages
+        newMessages.room.newMessages = privateMessages
         newMessages.room.user = user
         return (newMessages)
       })
