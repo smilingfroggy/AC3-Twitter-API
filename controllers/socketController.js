@@ -30,7 +30,10 @@ const socketController = {
         attributes: ['id', 'name', 'avatar', 'account']
       })
     ])
-      .then(([newMessages, user]) => { return ([newMessages, user]) })
+      .then(([newMessages, user]) => {
+        user = user.toJSON()
+        return ([newMessages, user])
+      })
   },
   savePrivateMessages: (messages) => { //輸入格式待確認：傳入roomId? type要存?
     // { name: "Majer", content: "吃早餐", id: 1, type: "message" }
@@ -53,7 +56,7 @@ const socketController = {
           { content: "阿囉哈", createdAt: "2021-12-10 03:46:51", User: { id: 1, account: 'JENNY', name: 'JEN', avatar: '' } },
           { content: "晚餐吃甚麼？", createdAt: "2021-12-11 03:46:51", User: { id: 2, account: 'JENNY', name: 'JEN', avatar: '' } }
         ]
-        return sampleMessages
+        return messages
       })
   },
   getRoomId: (UserId, UserId2) => {   //建立新 private room

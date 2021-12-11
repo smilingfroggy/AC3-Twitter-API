@@ -1,6 +1,7 @@
 const socketController = require('../controllers/socketController')
 const { generateMessage } = require('./message')
 const socket = require("socket.io");
+const listeners = socket.listenersAny();
 module.exports = (server) => {
 
   // let messages = [
@@ -20,12 +21,46 @@ module.exports = (server) => {
   io.on('connection', (socket) => {
     console.log('== connected! ===')
 
-    socket.on("public", async (id) => {
+
+    socket.on("publicEnter", async (id) => {
       const history = await socketController.getPublicMessages()
       socket.emit('allMessage', history)
       const user = await socketController.getUser(id)
-      socket.emit('Login', user)
+      user.content = "上線"
+      user.type = "notice"
+      socket.emit('publicLogin', user)
     });
+
+
+    socket.on("publicLeave", async (id) => {
+      const user = await socketController.getUser(id)
+      socket.emit('publicLogout', user)
+    });
+
+    //data= userId1, userId2
+    socket.on("privateEnter", async (data) => {
+      const roomId = await socketController.getRoomId(data)
+      const user = await socketController.getUser(id)
+      socket.join(`${roomId}`);
+      socket.to(`${roomId}`).emit('join_privateroom', roomId, user, history);
+    });
+
+    /* socket.on("privateLeave", async (data) => {
+       const roomId = await socketController.getRoomId(data)
+       const user = await socketController.getUser(id)
+       socket.leave(`${roomId}`);
+       socket.to(`${roomId}`).emit('leave_privateroom', { join_room: `${user.name}下線` });
+     });*/
+
+    //data= userId1, userId2, content
+    socket.on("privateMessage", (data) => {
+      const roomId = await socketController.getRoomId(data)
+      const user = await socketController.getUser(id)
+      const newMessage = await socketController.savePrivateMessages(data)
+      socket.to(`${roomId}`).emit("privateMessage", newMessage, roomId, user);
+    });
+
+
 
     socket.on("sendMessage", async (data) => {
       const newMessage = await socketController.savePublicMessages(data)
@@ -33,5 +68,4 @@ module.exports = (server) => {
     });
 
   })
-
 }
