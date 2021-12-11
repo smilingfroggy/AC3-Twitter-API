@@ -19,10 +19,19 @@ module.exports = (server) => {
   });
   io.on('connection', (socket) => {
     console.log('== connected! ===')
-    socket.on("login", async (id) => {    //async await待確認
+
+    socket.on("public", async (id) => {
+      const history = await socketController.getPublicMessages()
+      socket.emit('allMessage', history)
       const user = await socketController.getUser(id)
       socket.emit('Login', user)
     });
+
+    socket.on("sendMessage", async (data) => {
+      const newMessage = await socketController.savePublicMessages(data)
+      socket.emit('newMessage', newMessage)
+    });
+
   })
 
 }
