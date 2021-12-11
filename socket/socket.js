@@ -2,13 +2,9 @@ const socketController = require('../controllers/socketController')
 const { generateMessage } = require('./message')
 const socket = require("socket.io");
 const listeners = socket.listenersAny();
+const onlineUsers = []
 module.exports = (server) => {
 
-  // let messages = [
-  //   { name: "Majer", content: "吃早餐", id: 1, type: "message" },
-  //   { name: "Tom", content: "你好", id: 2, type: "message" },
-  //   { name: "Marry", content: "SOSOSOSOSODODODODODDODO", id: 3, type: "message" },
-  // ];
   const io = socket(server, {
     cors: {
       origin: "http://localhost:8080",
@@ -26,15 +22,21 @@ module.exports = (server) => {
       const history = await socketController.getPublicMessages()
       socket.emit('allMessage', history)
       const user = await socketController.getUser(id)
+      onlineUsers.push(user)
       user.content = "上線"
       user.type = "notice"
-      socket.emit('publicLogin', user)
+      socket.emit('publicLogin', user, onlineUsers)
     });
 
 
     socket.on("publicLeave", async (id) => {
       const user = await socketController.getUser(id)
-      socket.emit('publicLogout', user)
+      for (let i = 0; i < onlineUsers.length; i ++) {
+        if (onlineUsers[i].id === id) {
+          onlineUsers.splice(i, 1)
+        }
+      }
+      socket.emit('publicLogout', user, onlineUsers)
     });
 
     //data= userId1, userId2
