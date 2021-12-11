@@ -8,10 +8,10 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      SenderId: {
+      senderId: {
         type: Sequelize.INTEGER
       },
-      RecieverId: {
+      receiverId: {
         type: Sequelize.INTEGER
       },
       RoomId: {
