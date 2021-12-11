@@ -108,8 +108,8 @@ router.delete('/api/admin/tweets/:id', authenticated, authenticatedAdmin, adminC
 
 
 
-//socket相關
-router.get('/socket_message', socketController.getMessages)
+//socket相關  //備案
+router.get('/socket_message', socketController.getPublicMessages)
 
 module.exports = router
 
