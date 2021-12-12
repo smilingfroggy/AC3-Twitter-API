@@ -6,12 +6,16 @@ module.exports = (server) => {
 
   const io = socket(server, {
     cors: {
-      origin: 'https://bagebear.github.io/twitter-front-end-vue',
+      // origin: 'https://bagebear.github.io/twitter-front-end-vue',
+      // origin: '*',
+      origin: ["http://localhost:8080", "http://localhost:3000"],
       methods: ["GET", "POST"],
       // transports:['websocket','polling'],
-      // credentials: true,
+      credentials: true,
+      allowEIO3: true
     },
-    allowEIO3: true,
+    pingInterval: 10000,
+    pingTimeout: 5000,
   });
   io.on('connection', (socket) => {
     console.log('== connected! ===')
