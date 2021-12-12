@@ -8,12 +8,13 @@ module.exports = (server) => {
     cors: {
       // origin: 'https://bagebear.github.io/twitter-front-end-vue',
       // origin: '*',
-      origin: ["http://localhost:8080", "http://localhost:3000"],
+      origin: ["http://localhost:8080"],
       methods: ["GET", "POST"],
       // transports:['websocket','polling'],
+      allowedHeaders: ["my-custom-header"],
       credentials: true,
-      allowEIO3: true
     },
+    allowEIO3: true,
     pingInterval: 10000,
     pingTimeout: 5000,
   });
