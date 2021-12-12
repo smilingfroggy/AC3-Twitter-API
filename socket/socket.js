@@ -67,9 +67,9 @@ module.exports = (server) => {
       const roomId = await socketController.getRoomId(data)
       const sender = await socketController.getUser(data.senderId)   //data 資料格式？假設{ senderId: NUMBER, receiverId: NUMBER, content: STRING}
       const receiver = await socketController.getUser(data.receiverId)
-      const newMessage = await socketController.savePrivateMessages(roomId)
+      const newMessage = await socketController.savePrivateMessages(data, roomId)
       // socket.to(roomId).emit("privateMessage", newMessage, roomId, sender, receiver);   //TODO 整理資料
-      
+
       socket.to(roomId).emit("privateMessage", newMessage);
     });
 

@@ -58,8 +58,8 @@ const socketController = {
     })
       .then(room => { return room[0].id })
   },
-  savePrivateMessages: (data) => {
-    const { content, receiverId, senderId, RoomId } = data
+  savePrivateMessages: (data, RoomId) => {
+    const { content, receiverId, senderId } = data
     return Promise.all([
       PrivateMessage.create({
         content, receiverId, senderId, RoomId
@@ -69,10 +69,11 @@ const socketController = {
       })
     ])
       .then(([privateMessages, user]) => {
+        privateMessages = privateMessages.toJSON()
         user = user.toJSON()
         const newMessages = { room: RoomId }  // 外面再包一個roomID---待確認是否還需要外面包room
-        newMessages.room.newMessages = privateMessages
-        newMessages.room.user = user
+        newMessages.newMessages = privateMessages
+        newMessages.user = user
         return (newMessages)
       })
   },

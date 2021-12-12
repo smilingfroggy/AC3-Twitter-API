@@ -54,18 +54,23 @@ const socketController = {
       })
   },
   getRoomId: (req, res) => {   //建立新 private room
-    const { UserId, UserId2 } = req.body
+    const { userId, userId2 } = req.body
+    let UserId, UserId2
+    if (userId > userId2) {
+      [UserId, UserId2] = [userId2, userId]
+    } else {
+      [UserId, UserId2] = [userId, userId2]
+    }
     return Room.findOrCreate({   //+ include user
       where: { UserId, UserId2 }
     })
       .then(room => {   // [ {room object}, Boolean(T:create;F:found)]
         // room = room.toJSON()    // TypeError: room.toJSON is not a function
-        console.log(room)
         return res.json(room[0].id)
       })
   },
   savePrivateMessages: (req, res) => {
-    const { content, receiverId, senderId, RoomId } = req.body
+    const { content, receiverId, senderId, RoomId } = req.body    //實際上RoomId由後端自己算出
     return Promise.all([
       PrivateMessage.create({
         content, receiverId, senderId, RoomId
@@ -75,14 +80,16 @@ const socketController = {
       })
     ])
       .then(([privateMessages, user]) => {
+        privateMessages = privateMessages.toJSON()
         user = user.toJSON()
-        const newMessages = { room: RoomId }  // 外面再包一個roomID---待確認是否還需要外面包room
-        newMessages.room.newMessages = privateMessages
-        newMessages.room.user = user
-        return (newMessages)
+        let newMessages = { room: RoomId }  // 外面再包一個roomID---待確認是否還需要外面包room
+        newMessages.newMessages = privateMessages
+        newMessages.user = user
+        return res.json(newMessages)
       })
   },
-  getPrivateMessages: (RoomId) => {    // Room難以一次做2個 userId關聯取得user資料 
+  getPrivateMessages: (req, res) => {   // Room難以一次做2個 userId關聯取得user資料 
+    const { RoomId } = req.body
     return Promise.all([
       PrivateMessage.findAll({
         where: { RoomId }   //無法include因privateMSG無關連到user
@@ -94,7 +101,7 @@ const socketController = {
       // })
     ])
       .then(([privateMessages]) => {    //, user, user
-        return privateMessages
+        return res.json(privateMessages)
       })
   },
   // getPrivateMessages1: (UserId) => {   // 前端：跟使用者有關的所有歷史訊息(而不是roomID)
