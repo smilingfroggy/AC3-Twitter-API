@@ -7,7 +7,6 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   PrivateMessage.associate = function (models) {
     // associations can be defined here
-    PrivateMessage.belongsTo(models.User)
     PrivateMessage.belongsTo(models.Room)
   };
   return PrivateMessage;
