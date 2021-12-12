@@ -9,6 +9,7 @@ const likeController = require('../controllers/likeController')
 const followController = require('../controllers/followController')
 const adminController = require('../controllers/adminController')
 const socketController = require('../controllers/socketController')
+const socketControllerAPI = require('../controllers/socketControllerAPI')
 
 const multer = require('multer')
 const upload = multer({ dest: 'temp/' })
@@ -109,7 +110,11 @@ router.delete('/api/admin/tweets/:id', authenticated, authenticatedAdmin, adminC
 
 
 //socket相關  //備案
-router.get('/socket_message', socketController.getPublicMessages)
+router.get('/socket/publicEnter/emit_publicLogin/GetUser', socketControllerAPI.getUser)
+router.get('/socket/sendMessage/emit_newMessage/SavePublicMessages', socketControllerAPI.savePublicMessages)
+router.get('/socket/publicEnter/emit_allMessage', socketControllerAPI.getPublicMessages)
+
+router.get('/socket/privateEnter/GetRoomId', socketControllerAPI.getRoomId)
 
 module.exports = router
 

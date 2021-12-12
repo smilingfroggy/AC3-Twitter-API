@@ -5,7 +5,9 @@ const PrivateMessage = db.PrivateMessage
 const Room = db.Room
 
 const socketController = {
-  getUser: (UserId) => {
+  // getUser: (UserId) => {***
+  getUser: (req, res) => {
+    const UserId = req.body.UserId
     return User.findByPk(UserId, {
       attributes: ['id', 'name', 'avatar', 'account']
     }).then(user => {
@@ -13,11 +15,14 @@ const socketController = {
       // user.content = "上線"   // 由socket.js處理
       // user.type = "notice"    //已確認不寫入資料庫/歷史訊息不顯示notice(上下線訊息)
       // console.log(user)
-      return user
+      user.content = "上線"
+      user.type = "notice"
+      return res.json(user)
+      // return user***
     })
   },
-  savePublicMessages: (data) => {
-    const { content, id } = data
+  savePublicMessages: (req, res) => {
+    const { content, id } = req.body
     return Promise.all([
       PublicMessage.create({
         content, UserId: id, type: "message" // type
@@ -28,10 +33,14 @@ const socketController = {
     ])
       .then(([newMessages, user]) => {
         user = user.toJSON()
-        return ([newMessages, user])
+        // return ([newMessages, user])***
+        const results = []
+        results.push(user)
+        results.push(newMessages)
+        return res.json(results)
       })
   },
-  getPublicMessages: () => {
+  getPublicMessages: (req, res) => {
     return PublicMessage.findAll({
       raw: true,
       nest: true,
@@ -41,17 +50,22 @@ const socketController = {
     })
       .then(messages => {
         console.log(messages)
-        return messages
+        return res.json(messages)
       })
   },
-  getRoomId: (UserId, UserId2) => {   //建立新 private room
+  getRoomId: (req, res) => {   //建立新 private room
+    const { UserId, UserId2 } = req.body
     return Room.findOrCreate({   //+ include user
       where: { UserId, UserId2 }
     })
-      .then(room => { return room[0].id })
+      .then(room => {   // [ {room object}, Boolean(T:create;F:found)]
+        // room = room.toJSON()    // TypeError: room.toJSON is not a function
+        console.log(room)
+        return res.json(room[0].id)
+      })
   },
-  savePrivateMessages: (data) => {
-    const { content, receiverId, senderId, RoomId } = data
+  savePrivateMessages: (req, res) => {
+    const { content, receiverId, senderId, RoomId } = req.body
     return Promise.all([
       PrivateMessage.create({
         content, receiverId, senderId, RoomId

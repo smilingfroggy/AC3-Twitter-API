@@ -19,12 +19,13 @@ module.exports = (server) => {
 
     socket.on("publicEnter", async (id) => {
       const history = await socketController.getPublicMessages()
-      socket.emit('allMessage', history)
+      socket.broadcast.emit('allMessage', history)
       const user = await socketController.getUser(id)
       onlineUsers.push(user)
       user.content = "上線"
       user.type = "notice"
       socket.emit('publicLogin', user, onlineUsers)
+      socket.broadcast.emit('publicLogin', user, onlineUsers)
     });
 
 
@@ -35,7 +36,7 @@ module.exports = (server) => {
           onlineUsers.splice(i, 1)
         }
       }
-      socket.emit('publicLogout', user, onlineUsers)
+      socket.broadcast.emit('publicLogout', user, onlineUsers)
     });
 
     //data= userId1, userId2
@@ -76,6 +77,7 @@ module.exports = (server) => {
     socket.on("sendMessage", async (data) => {
       const newMessage = await socketController.savePublicMessages(data)
       socket.emit('newMessage', newMessage)
+      socket.broadcast.emit('newMessage', newMessage)
     });
 
   })
