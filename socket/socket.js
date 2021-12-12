@@ -9,7 +9,7 @@ module.exports = (server) => {
       origin: 'https://bagebear.github.io/twitter-front-end-vue',
       methods: ["GET", "POST"],
       // transports:['websocket','polling'],
-      credentials: true,
+      // credentials: true,
     },
     allowEIO3: true,
   });
