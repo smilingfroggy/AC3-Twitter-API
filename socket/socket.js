@@ -6,7 +6,7 @@ module.exports = (server) => {
 
   const io = socket(server, {
     cors: {
-      origin: "http://localhost:8080",
+      origin: '*',
       methods: ["GET", "POST"],
       // transports:['websocket','polling'],
       credentials: true,
