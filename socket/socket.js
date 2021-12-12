@@ -19,7 +19,7 @@ module.exports = (server) => {
 
     socket.on("publicEnter", async (id) => {
       const history = await socketController.getPublicMessages()
-      socket.broadcast.emit('allMessage', history)
+      socket.emit('allMessage', history)
       const user = await socketController.getUser(id)
       onlineUsers.push(user)
       user.content = "上線"
@@ -52,7 +52,7 @@ module.exports = (server) => {
       results.user2 = user2
       results.history = history
       // socket.to(`${roomId}`).emit('join_privateroom', roomId, user1, user2, history);
-      socket.to(roomId).emit('join_privateroom', results);
+      socket.to(roomId).emit('privateLogin', results);
     });
 
     /* socket.on("privateLeave", async (data) => {
@@ -69,6 +69,7 @@ module.exports = (server) => {
       const receiver = await socketController.getUser(data.receiverId)
       const newMessage = await socketController.savePrivateMessages(roomId)
       // socket.to(roomId).emit("privateMessage", newMessage, roomId, sender, receiver);   //TODO 整理資料
+      
       socket.to(roomId).emit("privateMessage", newMessage);
     });
 
