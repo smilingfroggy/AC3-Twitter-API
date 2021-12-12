@@ -6,9 +6,8 @@ module.exports = (server) => {
 
   const io = socket(server, {
     cors: {
-      origin: 'https://bagebear.github.io',
       // origin: '*',
-      // origin: ["http://localhost:8080"],
+      origin: ["http://localhost:8080", "https://bagebear.github.io"],
       methods: ["GET", "POST"],
       // transports:['websocket','polling'],
       // allowedHeaders: ["my-custom-header"],
