@@ -44,7 +44,15 @@ const socketController = {
         return messages
       })
   },
-  getRoomId: (UserId, UserId2) => {   //建立新 private room
+  getRoomId: (data) => {   //建立新 private room
+    // 判斷大小，UserId-小 UserId2-大
+    let [id, id2] = [data[0], data[1]]
+    let UserId, UserId2
+    if (id > id2) {
+      [UserId, UserId2] = [id2, id]
+    } else {
+      [UserId, UserId2] = [id, id2]
+    }
     return Room.findOrCreate({   //+ include user
       where: { UserId, UserId2 }
     })
