@@ -6,7 +6,7 @@ module.exports = (server) => {
 
   const io = socket(server, {
     cors: {
-      origin: '*',
+      origin: 'https://bagebear.github.io/twitter-front-end-vue',
       methods: ["GET", "POST"],
       // transports:['websocket','polling'],
       credentials: true,
