@@ -40,7 +40,6 @@ const socketController = {
       order: [['createdAt', 'ASC']]
     })
       .then(messages => {
-        console.log(messages)
         return messages
       })
   },
@@ -77,10 +76,11 @@ const socketController = {
         return (newMessages)
       })
   },
-  getPrivateMessages: (RoomId) => {    // Room難以一次做2個 userId關聯取得user資料 
+  getPrivateMessages: (RoomId) => {   //所有歷史訊息
     return Promise.all([
       PrivateMessage.findAll({
-        where: { RoomId }   //無法include因privateMSG無關連到user
+        where: { RoomId },
+        order: [['createdAt', 'DESC']]   // 待確認排序
       }),
       // Room.findByPk(RoomId).then(room => {   //待確認 訊息物件裡，是否包含2位user使用者資料
       //   User.findByPk(room.UserId).then(user => { 
