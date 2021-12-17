@@ -22,14 +22,23 @@ module.exports = (server) => {
 
 
     socket.on("publicEnter", async (id) => {
+      socket.join('PublicRoom');
+      // 回覆歷史訊息
       const history = await socketController.getPublicMessages()
-      socket.emit('allMessage', history)
+      socket.emit('allMessage', history)  //加to PublicRoom 自己會收不到訊息
+
+      // 回覆使用者上線狀態
       const user = await socketController.getUser(id)
-      onlineUsers.push(user)
       user.content = "上線"
       user.type = "notice"
-      socket.emit('publicLogin', user, onlineUsers)
-      socket.broadcast.emit('publicLogin', user, onlineUsers)
+      
+      if (!onlineUsers.map(user => user.id).includes(user.id)) {  // 檢查排除重複加入上線使用者清單
+        onlineUsers.push(user)
+        console.log("onlineUsers: ", onlineUsers)
+        socket.to('PublicRoom').emit('publicLogin', user, onlineUsers)
+      } 
+      socket.emit('publicLogin', user, onlineUsers) //OK {...}, [{..},{..}] 加to PublicRoom會收不到；放在if之外，自己在沒有disconnected情況下回到聊天室時，才會有onlineUsers列表
+      
     });
 
 
