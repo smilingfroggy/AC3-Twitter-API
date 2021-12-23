@@ -32,7 +32,7 @@ module.exports = (server) => {
       user.content = "上線"
       user.type = "notice"
 
-      if (!onlineUsers.map(user => user.id).includes(user.id)) {  // 檢查排除重複加入上線使用者清單
+      if (!onlineUsers.filter(_user => _user.id === user.id).length) {   // 檢查排除重複加入上線使用者清單
         onlineUsers.push(user)
         console.log("onlineUsers: ", onlineUsers)
         socket.to('PublicRoom').emit('publicLogin', user, onlineUsers)
