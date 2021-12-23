@@ -34,9 +34,8 @@ module.exports = (server) => {
 
       if (!onlineUsers.filter(_user => _user.id === user.id).length) {   // 檢查排除重複加入上線使用者清單
         onlineUsers.push(user)
-        socket.to('PublicRoom').emit('publicLogin', user, onlineUsers)
       }
-      socket.emit('publicLogin', user, onlineUsers) //OK {...}, [{..},{..}] 加to PublicRoom會收不到；放在if之外，自己在沒有disconnected情況下回到聊天室時，才會有onlineUsers列表
+      io.in('PublicRoom').emit('publicLogin', user, onlineUsers)
 
       // fetchSockets 功能測試
       const sockets = await io.in("PublicRoom").fetchSockets();
