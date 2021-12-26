@@ -44,16 +44,12 @@ const socketController = {
       })
   },
   getRoomId: (data) => {   //建立新 private room
-    // 判斷大小，UserId-小 UserId2-大
-    let [id, id2] = [data[0], data[1]]
-    let UserId, UserId2
-    if (id > id2) {
-      [UserId, UserId2] = [id2, id]
-    } else {
-      [UserId, UserId2] = [id, id2]
-    }
+    let [id, id2] = [data.senderId, data.receiverId]
+    const userArray = [id, id2]
+    userArray.sort((id, id2) => id - id2) // 改為升冪排序
+
     return Room.findOrCreate({   //+ include user
-      where: { UserId, UserId2 }
+      where: { UserId: id, UserId2: id2 }
     })
       .then(room => { return room[0].id })
   },
