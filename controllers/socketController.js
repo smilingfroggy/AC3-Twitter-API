@@ -54,12 +54,12 @@ const socketController = {
       .then(room => { return room[0].id })
   },
   savePrivateMessages: (data, RoomId) => {
-    const { content, receiverId, senderId } = data
+    const { content, receiverId, senderId: UserId } = data
     return Promise.all([
       PrivateMessage.create({
-        content, receiverId, senderId, RoomId
+        content, receiverId, UserId, RoomId
       }),
-      User.findByPk(senderId, {
+      User.findByPk(UserId, {
         attributes: ['id', 'name', 'avatar', 'account']
       })
     ])

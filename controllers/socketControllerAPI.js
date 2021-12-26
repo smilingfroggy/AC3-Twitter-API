@@ -70,12 +70,12 @@ const socketController = {
       })
   },
   savePrivateMessages: (req, res) => {
-    const { content, receiverId, senderId, RoomId } = req.body    //實際上RoomId由後端自己算出
+    const { content, receiverId, senderId: UserId, RoomId } = req.body    //實際上RoomId由後端自己算出
     return Promise.all([
       PrivateMessage.create({
-        content, receiverId, senderId, RoomId
+        content, receiverId, UserId, RoomId
       }),
-      User.findByPk(senderId, {
+      User.findByPk(UserId, {
         attributes: ['id', 'name', 'avatar', 'account']
       })
     ])
