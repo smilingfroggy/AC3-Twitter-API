@@ -82,20 +82,15 @@ const socketController = {
         return (newMessages)
       })
   },
-  getPrivateMessages: (RoomId) => {   //所有歷史訊息
-    return Promise.all([
-      PrivateMessage.findAll({
-        where: { RoomId },
-        order: [['createdAt', 'DESC']]   // 待確認排序
-      }),
-      // Room.findByPk(RoomId).then(room => {   //待確認 訊息物件裡，是否包含2位user使用者資料
-      //   User.findByPk(room.UserId).then(user => { 
-      //     User.findByPk(room.UserId2).then()
-      //   })
-      // })
-    ])
-      .then(([privateMessages]) => {    //, user, user
-        return privateMessages
+  getRoomPrivateMessages: (RoomId) => {   //特定roomId所有歷史訊息
+    return PrivateMessage.findAll({
+      where: { RoomId },
+      order: [['createdAt', 'ASC']],
+      include: { model: User, attributes: ['id', 'name', 'avatar', 'account'] },  //sender info
+    }).then((privateMessages) => {
+      return privateMessages
+    })
+  },
       })
   },
   // getPrivateMessages1: (UserId) => {   // 前端：跟使用者有關的所有歷史訊息(而不是roomID)

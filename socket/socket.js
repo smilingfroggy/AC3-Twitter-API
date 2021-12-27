@@ -103,18 +103,21 @@ module.exports = (server) => {
       // }
       const sockets = await io.in("User" + data.senderId).fetchSockets();
       console.log("joined socket.rooms: ", socket.rooms)
+      // V1 - 僅取得單一roomId的所有歷史訊息
       const roomId = await socketController.getRoomId(data)
-      const user1 = await socketController.getUser(data[0])   //data 資料格式？假設 [userId1, userId2]
-      const user2 = await socketController.getUser(data[1])
-      const history = await socketController.getPrivateMessages(roomId)
-      socket.join(roomId);
+      socket.join(roomId);  //TODO: receiver也要加入roomId(receiver上線時就會加入所有所屬roomId)
+
+      // const user1 = await socketController.getUser(data.senderId)
+      // const user2 = await socketController.getUser(data.receiverId)
+      const history = await socketController.getRoomPrivateMessages(roomId)
+      
       let results = {}
       results.roomId = roomId
-      results.user1 = user1
-      results.user2 = user2
+      // results.user1 = user1  user資訊已在 history裡面，這裡不再加入
+      // results.user2 = user2
       results.history = history
       // socket.to(`${roomId}`).emit('join_privateroom', roomId, user1, user2, history);
-      socket.to(roomId).emit('privateLogin', results);
+      socket.emit('roomPrivateHistory', results);
     });
 
     /* socket.on("privateLeave", async (data) => {
