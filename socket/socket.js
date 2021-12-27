@@ -82,8 +82,27 @@ module.exports = (server) => {
     });
 
 
-    //data= userId1, userId2
+    //data = { senderId, receiverId }
     socket.on("privateEnter", async (data) => {
+      console.log(`got privateEnter data ${data}`)
+      // 不管從userInfo進入或是privateChat，都會載入自己的所有roomId和聊天歷史並加入romm
+      // => senderId 可能與 後端儲存的roomId 重複
+      socket.join("User" + data.senderId);
+
+      // 待確認 還是需要加入此user所屬的每個room
+      // A.只要on:privateEnter就馬上加入所有所屬room
+      // B.點擊個別私人聊天室才進入room --> 需要前端emit: 要加入哪個roomId
+
+      const allRoomId = await socketController.getAllUserRoomId(data.senderId)
+      // A.馬上加入所有所屬roomId
+      allRoomId.forEach( roomId => {
+        socket.join(roomId)
+      })
+      // for (let id of allRoomId ) {
+      //   await socket.join(roomId)
+      // }
+      const sockets = await io.in("User" + data.senderId).fetchSockets();
+      console.log("joined socket.rooms: ", socket.rooms)
       const roomId = await socketController.getRoomId(data)
       const user1 = await socketController.getUser(data[0])   //data 資料格式？假設 [userId1, userId2]
       const user2 = await socketController.getUser(data[1])
