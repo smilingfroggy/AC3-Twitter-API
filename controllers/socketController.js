@@ -3,6 +3,7 @@ const User = db.User
 const PublicMessage = db.PublicMessage
 const PrivateMessage = db.PrivateMessage
 const Room = db.Room
+const { Op, Sequelize } = require("sequelize");
 
 const socketController = {
   getUser: (UserId) => {
@@ -52,6 +53,15 @@ const socketController = {
       where: { UserId: id, UserId2: id2 }
     })
       .then(room => { return room[0].id })
+  },
+  getAllUserRoomId: (UserId) => {
+    return Room.findAll({
+      raw: true,
+      attributes: ["id"],
+      where: { [Op.or]: [{ UserId }, { UserId2: UserId }] },
+    }).then((rooms) => {
+      return rooms.map(room => room.id)
+    })
   },
   savePrivateMessages: (data, RoomId) => {
     const { content, receiverId, senderId: UserId } = data

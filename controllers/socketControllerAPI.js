@@ -3,6 +3,7 @@ const User = db.User
 const PublicMessage = db.PublicMessage
 const PrivateMessage = db.PrivateMessage
 const Room = db.Room
+const { Op, Sequelize } = require("sequelize");
 
 const socketController = {
   // getUser: (UserId) => {***
@@ -68,6 +69,17 @@ const socketController = {
         // room = room.toJSON()    // TypeError: room.toJSON is not a function
         return res.json(room[0].id)
       })
+  },
+  getAllUserRoomId: (req, res) => {
+    const { UserId } = req.body
+    return Room.findAll({
+      raw: true,
+      attributes: ["id"],
+      where: { [Op.or]: [{ UserId }, { UserId2: UserId }] },
+    }).then((rooms) => {    //[ { id: 1 }, { id: 3 } ]
+      rooms = rooms.map(room => room.id)
+      return res.json(rooms)  //[1, 3]
+    })
   },
   savePrivateMessages: (req, res) => {
     const { content, receiverId, senderId: UserId, RoomId } = req.body    //實際上RoomId由後端自己算出
