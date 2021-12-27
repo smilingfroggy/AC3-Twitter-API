@@ -152,7 +152,12 @@ module.exports = (server) => {
       const newMessage = await socketController.savePrivateMessages(data, roomId)
       // socket.to(roomId).emit("privateMessage", newMessage, roomId, sender, receiver);   //TODO 整理資料
 
-      socket.to(roomId).emit("privateMessage", newMessage);
+      console.log("sender", sender);
+      console.log(newMessage);
+      // io.to;
+      io.to("User" + data.senderID).to("User" + data.receiverId).emit("privateMessage", newMessage);
+      io.in(roomId).emit("privateMessage", newMessage);
+      // socket.to(roomId).emit("privateMessage", newMessage);
     });
 
 
