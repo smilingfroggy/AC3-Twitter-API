@@ -117,6 +117,7 @@ router.get('/socket/publicEnter/emit_allMessage', socketControllerAPI.getPublicM
 router.get('/socket/privateEnter/emit_privateLogin/GetRoomId', socketControllerAPI.getRoomId)
 router.get('/socket/privateEnter/emit_privateLogin/getAllUserRoomId', socketControllerAPI.getAllUserRoomId)
 router.get('/socket/privateEnter/emit_privateLogin/GetRoomPrivateMessages', socketControllerAPI.getRoomPrivateMessages)
+router.get('/socket/privateEnter/emit_privateHistory/GetLatestPrivateMessages', socketControllerAPI.getLatestPrivateMessages)
 router.get('/socket/privateMessage/emit_privateMessage/SavePrivateMessages', socketControllerAPI.savePrivateMessages)
 
 module.exports = router
