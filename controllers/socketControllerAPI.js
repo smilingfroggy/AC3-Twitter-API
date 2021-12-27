@@ -110,22 +110,44 @@ const socketController = {
       return res.json(privateMessages)
     })
   },
-  // getPrivateMessages1: (UserId) => {   // 前端：跟使用者有關的所有歷史訊息(而不是roomID)
-  //   return PrivateMessage.findAll({
-  //     raw: true,
-  //     nest: true,
-  //     where: { $or: { 
-  //       senderId: UserId, 
-  //       receiverId: UserId
-  //     } },    // 不用RoomId找
-  //     include: { model: User, attributes: ['id', 'name', 'avatar', 'account'] },
-  //     attributes: ['id', 'content', 'createdAt'],
-  //     order: [['createdAt', 'ASC']]
-  //   })
-  //     .then(messages => {     // 
-
-  //     })
-  // },
+  getLatestPrivateMessages: (req, res) => {   // 前端：使用者每個私人聊天室的最新歷史訊息
+    const { UserId } = req.body
+    return PrivateMessage.findAll({
+      raw: true,
+      nest: true,
+      where: {
+        $or: {
+          UserId: UserId,
+          receiverId: UserId
+        }
+      },
+      attributes: [[Sequelize.fn('max', Sequelize.col('PrivateMessage.createdAt')), 'createdAt']],
+      group: 'RoomId',
+      order: [['createdAt', 'ASC']]
+    })
+      .then(async (latestCreatTime) => {
+        let latestMessages = []
+        for (let eachTime of latestCreatTime) {
+          await PrivateMessage.findOne({
+            raw: true,
+            nest: true,
+            where: {
+              $or: {
+                UserId: UserId,
+                receiverId: UserId
+              },
+              createdAt: eachTime.createdAt
+            },
+            order: [['createdAt', 'ASC']],
+            include: { model: User, attributes: ['id', 'name', 'avatar', 'account'] },  //sender info
+          })
+            .then(msg => {
+              return latestMessages.push(msg)
+            })
+        }
+        return res.json(latestMessages)
+      })
+  }
 }
 
 module.exports = socketController

@@ -91,24 +91,46 @@ const socketController = {
       return privateMessages
     })
   },
+  getLatestPrivateMessages: (UserId) => {   // 前端：使用者每個私人聊天室的最新歷史訊息
+    return PrivateMessage.findAll({
+      raw: true,
+      nest: true,
+      where: {
+        $or: {
+          UserId: UserId,
+          receiverId: UserId
+        }
+      },
+      group: 'RoomId',
+      order: [['createdAt', 'ASC']],
+      // order: [[Sequelize.fn('max', Sequelize.col('PrivateMessage.createdAt')), 'DESC']], //Column 'createdAt' in field list is ambiguous (需與 model: User 區隔)
+      // => PrivateMessage.createdAt
+      attributes: [[Sequelize.fn('max', Sequelize.col('PrivateMessage.createdAt')), 'createdAt']],
+      //fn max 放attributes裡面，只有createdAt是最新的時間，但是content頂其他內容沒有對應到最新資訊
+    })
+      .then(async (latestCreatTime) => {
+        let latestMessages = []
+        for (let eachTime of latestCreatTime) {
+          await PrivateMessage.findOne({
+            raw: true,
+            nest: true,
+            where: {
+              $or: {
+                UserId: UserId,
+                receiverId: UserId
+              },
+              createdAt: eachTime.createdAt
+            },
+            order: [['createdAt', 'ASC']],
+            include: { model: User, attributes: ['id', 'name', 'avatar', 'account'] },  //sender info
+          })
+            .then(msg => {
+              return latestMessages.push(msg)
+            })
+        }
+        return latestMessages
       })
   },
-  // getPrivateMessages1: (UserId) => {   // 前端：跟使用者有關的所有歷史訊息(而不是roomID)
-  //   return PrivateMessage.findAll({
-  //     raw: true,
-  //     nest: true,
-  //     where: { $or: { 
-  //       senderId: UserId, 
-  //       receiverId: UserId
-  //     } },    // 不用RoomId找
-  //     include: { model: User, attributes: ['id', 'name', 'avatar', 'account'] },
-  //     attributes: ['id', 'content', 'createdAt'],
-  //     order: [['createdAt', 'ASC']]
-  //   })
-  //     .then(messages => {     // 
-
-  //     })
-  // },
 }
 
 module.exports = socketController

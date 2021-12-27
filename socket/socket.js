@@ -103,6 +103,23 @@ module.exports = (server) => {
       // }
       const sockets = await io.in("User" + data.senderId).fetchSockets();
       console.log("joined socket.rooms: ", socket.rooms)
+
+      
+      //  V3 - 取得使用者加入的所有歷史訊息
+      const allPrivateHistory = await Promise.all(
+        allRoomId.map(async (_room) => {
+          const history = await socketController.getRoomPrivateMessages(_room)
+          return { roomId: _room, history }
+        })
+      )
+      socket.emit("privateHistory", allPrivateHistory)
+
+      
+      // V2 - 取得使用者加入的每個Room的最新歷史訊息
+      const latestPrivateHistory = await socketController.getLatestPrivateMessages(data.senderId)
+      socket.emit("latestPrivateHistory", latestPrivateHistory)
+
+
       // V1 - 僅取得單一roomId的所有歷史訊息
       const roomId = await socketController.getRoomId(data)
       socket.join(roomId);  //TODO: receiver也要加入roomId(receiver上線時就會加入所有所屬roomId)
