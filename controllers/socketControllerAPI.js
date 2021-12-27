@@ -116,7 +116,7 @@ const socketController = {
       raw: true,
       nest: true,
       where: {
-        $or: {
+        [Op.or]: {
           UserId: UserId,
           receiverId: UserId
         }
@@ -132,7 +132,7 @@ const socketController = {
             raw: true,
             nest: true,
             where: {
-              $or: {
+              [Op.or]: {
                 UserId: UserId,
                 receiverId: UserId
               },

@@ -27,10 +27,8 @@ const likeController = {
   postUnlike: (req, res) => {
     Like.findOne({
       where: {
-        $and: {
           UserId: helpers.getUser(req).id,
           TweetId: req.params.tweetId,
-        }
       }
     }).then(like => {
       if (!like) {

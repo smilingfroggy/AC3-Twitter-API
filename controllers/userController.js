@@ -91,7 +91,7 @@ const userController = {
     // 確認email或account是否重複
     return User.findOne({
       where: {
-        $or: [
+        [Op.or]: [
           { email },
           { account }
         ]
@@ -145,7 +145,7 @@ const userController = {
     // 確認email或account是否重複
     User.findOne({
       where: {
-        $or: [
+        [Op.or]: [
           { email },
           { account }
         ],

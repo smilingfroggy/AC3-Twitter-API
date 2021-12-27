@@ -8,7 +8,7 @@ const followController = {
   addFollowship: (req, res) => {
     Followship.findOne({  //TODO: 可優化成findOrCreate
       where: {
-        $and: {
+        [Op.and]: {
           followerId: helpers.getUser(req).id,
           followingId: req.body.id
         }
@@ -28,7 +28,7 @@ const followController = {
   deleteFollowship: (req, res) => {
     Followship.destroy({
       where: {
-        $and: {
+        [Op.and]: {
           followerId: helpers.getUser(req).id,
           followingId: req.params.followingId
         }
