@@ -63,13 +63,12 @@ const socketController = {
   },
   getAllUserRoomId: (UserId) => {
     return Room.findAll({
-      attributes: ["id"],
-      where: { [Op.or]: [{ UserId }, { UserId2: UserId }] },
-    }).then((room) => {
-      return room.map((_data) => {
-        return _data.dataValues.id;
-      });
-    });
+      raw: true,
+      // attributes: ["id"],
+      where: { [Op.or]: [{ UserId }, { UserId2: UserId }], },
+    }).then((rooms) => {
+      return rooms
+    })
   },
   // getPrivateUserHistories: (UserId) => {},
   savePrivateMessages: (data, RoomId) => {

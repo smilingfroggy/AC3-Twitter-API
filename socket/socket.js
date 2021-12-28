@@ -19,7 +19,14 @@ module.exports = (server) => {
   io.on("connection", (socket) => {
     console.log("== connected! ===");
 
+    socket.on("unReadCount", async (UserId) => {
+      // 待確認
+      const unReadCount = await socketController.getUnReadCount(UserId);
+      socket.emit("unReadCount", unReadCount);
+    });
+
     socket.on("publicEnter", async (id) => {
+      console.log("== publicEnter! ===");
       socket.join("PublicRoom");
       // 回覆歷史訊息
       const history = await socketController.getPublicMessages();
@@ -35,7 +42,6 @@ module.exports = (server) => {
         onlineUsers.push(user);
       }
       io.in("PublicRoom").emit("publicLogin", user, onlineUsers);
-
       // fetchSockets 功能測試
       const sockets = await io.in("PublicRoom").fetchSockets();
       socket.data.userId = user.id;
@@ -89,43 +95,97 @@ module.exports = (server) => {
       //   socket.broadcast.emit('publicLogout', "onlineUsers to provide")
     });
 
-    //data= userId1, userId2
+    //data = { senderId, receiverId }
     socket.on("privateEnter", async (data) => {
-      // 不管從userInfo進入或是privateChat，都會載入自己的所有roomId和聊天歷史並加入romm
-      socket.join(data.senderId);
+      console.log(`got privateEnter data ${data}`);
+      // 不管從userInfo進入或是privateChat，都會載入自己的所有roomId和聊天歷史並加入room
+      socket.join("User" + data.senderId); //避免與roomId 重複
 
+      if (data.receiverId) {
+        //從userInfo 進入
+        const roomId = await socketController.getRoomId(data);
+        socket.join(roomId); //TODO: receiver也要加入roomId(receiver上線時就會加入所有所屬roomId)
+        const receiver = await socketController.getUser(data.receiverId);
+        const receiverRespond = { ...receiver, roomId };
+        socket.emit("privateReceiver", receiverRespond);
+
+        // V1 - 僅取得單一roomId的所有歷史訊息；待確認可否 沒有history就不emit
+        const history = await socketController.getRoomPrivateMessages(roomId);
+        const results = { roomId: roomId, history: history };
+        socket.emit("roomPrivateHistory", results);
+      }
+
+      // 加入所有所屬roomId
       const allRoomId = await socketController.getAllUserRoomId(data.senderId);
-      const allPrivateHistory = await Promise.all(
+      console.log("allRoomId", allRoomId);
+      const allRoomIdWithReceiver = await Promise.all(
         allRoomId.map(async (_room) => {
-          const history = await socketController.getPrivateMessages(_room);
-          return { roomId: _room, history };
+          if (!_room.UserId || !_room.UserId2) {
+            console.log('return')
+            return;
+          }
+          else if(_room.UserId === data.senderId) {
+            console.log('bequal')
+            let receiver = await socketController.getUser(_room.UserId2);
+            console.log('equal',receiver)
+            return { ..._room, receiver };
+          }
+          console.log('!bequal')
+          let receiver = await socketController.getUser(_room.UserId);
+          console.log('!equal',receiver)
+          return { ..._room, receiver };
         })
       );
-      // console.log("ALLPH", allPrivateHistory);
+      allRoomId.forEach((_room) => {
+        socket.join(_room.id);
+      });
+      console.log("allRoomIdWithReceiver", allRoomIdWithReceiver);
+      const sockets = await io.in("User" + data.senderId).fetchSockets();
+      console.log("joined socket.rooms: ", socket.rooms);
+
+      //  V3 - 取得使用者加入的所有歷史訊息----暫時不用
+      const allPrivateHistory = await Promise.all(
+        allRoomIdWithReceiver.map(async (_room) => {
+          const history = await socketController.getRoomPrivateMessages(
+            _room.id
+          );
+          return { ..._room, history };
+        })
+      );
 
       socket.emit("privateHistory", allPrivateHistory);
 
-      // const roomId = await socketController.getRoomId(data);
-      // const user1 = await socketController.getUser(data.senderId); //data 資料格式？假設 {senderId: NUMBER, receiverId: NUMBER}
-      // const user2 = await socketController.getUser(data.receiverId);
-      // const history = await socketController.getPrivateMessages(roomId);
-      // socket.join(roomId);
-      // let results = {};
-      // results.roomId = roomId;
-      // results.user1 = user1;
-      // results.user2 = user2;
-      // results.history = history;
-      // io.in(roomId).emit("privateLogin", results);
-      // socket.to(`${roomId}`).emit('join_privateroom', roomId, user1, user2, history);
-      socket.to(roomId).emit("privateLogin", results);
+      // V2 - 取得使用者加入的每個Room的最新歷史訊息
+      const latestPrivateHistory =
+        await socketController.getLatestPrivateMessages(data.senderId);
+      console.log("latest", latestPrivateHistory);
+      socket.emit("latestPrivateHistory", latestPrivateHistory);
     });
 
-    /* socket.on("privateLeave", async (data) => {
-       const roomId = await socketController.getRoomId(data)
-       const user = await socketController.getUser(id)
-       socket.leave(`${roomId}`);
-       socket.to(`${roomId}`).emit('leave_privateroom', { join_room: `${user.name}下線` });
-     });*/
+    socket.on("getRoomHistory", async (data) => {
+      // 使用者點選私人訊息列表，需要知道登入使用者 data = { currentUserId, roomId }
+      // V1 - 僅取得單一roomId的所有歷史訊息
+      // const roomId = await socketController.getRoomId(data)  // 如果前端直接提供roomId
+
+      // socket.join(roomId);  //舊房間在privateEnter時就都加入了；如果是新房間不會透過privateRoomEnter進入
+      // TODO: receiver如果在線上也要加入roomId(如果對方原本離線，上線時就會加入所有所屬roomId)
+
+      const history = await socketController.getRoomPrivateMessages(
+        data.roomId
+      );
+      const results = { roomId: data.roomId, history };
+      socket.emit("roomPrivateHistory", results);
+
+      // 修改此roomId之所有訊息為已讀 + 總數
+      await socketController.readPrivateMessages(
+        data.currentUserId,
+        data.roomId
+      );
+      const unReadCount = await socketController.getUnReadCount(
+        data.currentUserId
+      );
+      socket.emit("unReadCount", unReadCount);
+    });
 
     //data= userId1, userId2, content
     socket.on("privateMessage", async (data) => {
@@ -140,9 +200,17 @@ module.exports = (server) => {
       console.log("sender", sender);
       console.log(newMessage);
       // io.to;
-      io.to(senderID).to(receiverId).emit("privateMessage", newMessage);
-      io.in(roomId).emit("privateMessage", newMessage);
+      io.to("User" + data.senderID)
+        .to("User" + data.receiverId)
+        .emit("privateMessage", newMessage);
+      // io.in(roomId).emit("privateMessage", newMessage);
       // socket.to(roomId).emit("privateMessage", newMessage);
+
+      // receiver 若在線上，但不在當下聊天室內，需要更新unReadCount
+      const unReadCount = await socketController.getUnReadCount(
+        data.receiverId
+      );
+      io.to("User" + data.receiverId).emit("unReadCount", unReadCount);
     });
 
     socket.on("sendMessage", async (data) => {
