@@ -13,13 +13,9 @@ const socketController = {
       attributes: ['id', 'name', 'avatar', 'account']
     }).then(user => {
       user = user.toJSON()
-      // user.content = "上線"   // 由socket.js處理
-      // user.type = "notice"    //已確認不寫入資料庫/歷史訊息不顯示notice(上下線訊息)
-      // console.log(user)
       user.content = "上線"
       user.type = "notice"
       return res.json(user)
-      // return user***
     })
   },
   savePublicMessages: (req, res) => {
@@ -85,7 +81,7 @@ const socketController = {
     const { content, receiverId, senderId: UserId, RoomId } = req.body    //實際上RoomId由後端自己算出
     return Promise.all([
       PrivateMessage.create({
-        content, receiverId, UserId, RoomId
+        content, receiverId, UserId, RoomId, isRead: false
       }),
       User.findByPk(UserId, {
         attributes: ['id', 'name', 'avatar', 'account']

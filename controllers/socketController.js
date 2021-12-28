@@ -67,7 +67,7 @@ const socketController = {
     const { content, receiverId, senderId: UserId } = data
     return Promise.all([
       PrivateMessage.create({
-        content, receiverId, UserId, RoomId
+        content, receiverId, UserId, RoomId, isRead: false
       }),
       User.findByPk(UserId, {
         attributes: ['id', 'name', 'avatar', 'account']

@@ -4,6 +4,7 @@ module.exports = (sequelize, DataTypes) => {
     UserId: DataTypes.INTEGER,
     receiverId: DataTypes.INTEGER,
     content: DataTypes.STRING,
+    isRead: DataTypes.BOOLEAN,
     RoomId: DataTypes.INTEGER
   }, {});
   PrivateMessage.associate = function (models) {
