@@ -36,7 +36,6 @@ module.exports = (server) => {
         onlineUsers.push(user)
       }
       io.in('PublicRoom').emit('publicLogin', user, onlineUsers)
-
       // fetchSockets 功能測試
       const sockets = await io.in("PublicRoom").fetchSockets();
       socket.data.userId = user.id
@@ -85,16 +84,24 @@ module.exports = (server) => {
     //data = { senderId, receiverId }
     socket.on("privateEnter", async (data) => {
       console.log(`got privateEnter data ${data}`)
-      // 不管從userInfo進入或是privateChat，都會載入自己的所有roomId和聊天歷史並加入romm
-      // => senderId 可能與 後端儲存的roomId 重複
-      socket.join("User" + data.senderId);
+      // 不管從userInfo進入或是privateChat，都會載入自己的所有roomId和聊天歷史並加入room
+      socket.join("User" + data.senderId);  //避免與roomId 重複
 
-      // 待確認 還是需要加入此user所屬的每個room
-      // A.只要on:privateEnter就馬上加入所有所屬room
-      // B.點擊個別私人聊天室才進入room --> 需要前端emit: 要加入哪個roomId
+      if (data.receiverId) {  //從userInfo 進入
+        const roomId = await socketController.getRoomId(data);
+        socket.join(roomId); //TODO: receiver也要加入roomId(receiver上線時就會加入所有所屬roomId)
+        const receiver = await socketController.getUser(data.receiverId);
+        const receiverRespond = { ...receiver, roomId }
+        socket.emit("privateReceiver", receiverRespond)
 
+        // V1 - 僅取得單一roomId的所有歷史訊息；待確認可否 沒有history就不emit
+        const history = await socketController.getRoomPrivateMessages(roomId)
+        const results = { roomId: roomId, history: history }
+        socket.emit('roomPrivateHistory', results);
+      }
+
+      // 加入所有所屬roomId
       const allRoomId = await socketController.getAllUserRoomId(data.senderId)
-      // A.馬上加入所有所屬roomId
       allRoomId.forEach( roomId => {
         socket.join(roomId)
       })
@@ -104,8 +111,7 @@ module.exports = (server) => {
       const sockets = await io.in("User" + data.senderId).fetchSockets();
       console.log("joined socket.rooms: ", socket.rooms)
 
-      
-      //  V3 - 取得使用者加入的所有歷史訊息
+      //  V3 - 取得使用者加入的所有歷史訊息----暫時不用
       const allPrivateHistory = await Promise.all(
         allRoomId.map(async (_room) => {
           const history = await socketController.getRoomPrivateMessages(_room)
