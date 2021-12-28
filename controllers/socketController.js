@@ -131,6 +131,15 @@ const socketController = {
         return latestMessages
       })
   },
+  readPrivateMessages: (currentUserId, RoomId) => {  // currentUser是receiver的未讀訊息，要改成已讀
+    return PrivateMessage.update({ isRead: true }, {
+      where: {
+        RoomId,
+        receiverId: currentUserId,
+        isRead: false
+      }
+    })
+  }
 }
 
 module.exports = socketController

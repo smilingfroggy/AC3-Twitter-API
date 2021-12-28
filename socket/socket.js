@@ -119,30 +119,24 @@ module.exports = (server) => {
       const latestPrivateHistory = await socketController.getLatestPrivateMessages(data.senderId)
       socket.emit("latestPrivateHistory", latestPrivateHistory)
 
-
-      // V1 - 僅取得單一roomId的所有歷史訊息
-      const roomId = await socketController.getRoomId(data)
-      socket.join(roomId);  //TODO: receiver也要加入roomId(receiver上線時就會加入所有所屬roomId)
-
-      // const user1 = await socketController.getUser(data.senderId)
-      // const user2 = await socketController.getUser(data.receiverId)
-      const history = await socketController.getRoomPrivateMessages(roomId)
-      
-      let results = {}
-      results.roomId = roomId
-      // results.user1 = user1  user資訊已在 history裡面，這裡不再加入
-      // results.user2 = user2
-      results.history = history
-      // socket.to(`${roomId}`).emit('join_privateroom', roomId, user1, user2, history);
-      socket.emit('roomPrivateHistory', results);
     });
 
-    /* socket.on("privateLeave", async (data) => {
-       const roomId = await socketController.getRoomId(data)
-       const user = await socketController.getUser(id)
-       socket.leave(`${roomId}`);
-       socket.to(`${roomId}`).emit('leave_privateroom', { join_room: `${user.name}下線` });
-     });*/
+    socket.on("getRoomHistory", async (data) => { // 使用者點選私人訊息列表，需要知道登入使用者 data = { currentUserId, roomId }
+      // V1 - 僅取得單一roomId的所有歷史訊息
+      // const roomId = await socketController.getRoomId(data)  // 如果前端直接提供roomId
+
+      // socket.join(roomId);  //舊房間在privateEnter時就都加入了；如果是新房間不會透過privateRoomEnter進入
+      // TODO: receiver如果在線上也要加入roomId(如果對方原本離線，上線時就會加入所有所屬roomId)
+
+      const history = await socketController.getRoomPrivateMessages(data.roomId)
+      const results = { roomId: data.roomId, history }
+      socket.emit('roomPrivateHistory', results);
+
+      // 修改此roomId之所有訊息為已讀 + 總數
+      await socketController.readPrivateMessages(data.currentUserId, data.roomId)
+      const unReadCount = await socketController.getUnReadCount(data.currentUserId)
+      socket.emit('unReadCount', unReadCount)
+    })
 
     //data= userId1, userId2, content
     socket.on("privateMessage", async (data) => {
