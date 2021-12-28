@@ -156,6 +156,18 @@ const socketController = {
       return res.json(readMessages) //updated quantity
     })
   },
+  getUnReadCount: (req, res) => {
+    const { UserId } = req.body
+    return PrivateMessage.findAll({
+      raw: true,
+      where: {
+        receiverId: UserId,
+        isRead: false
+      }
+    }).then(unreadMessages => {
+      return res.json(unreadMessages.length)
+    })
+  },
 }
 
 module.exports = socketController

@@ -120,6 +120,7 @@ router.get('/socket/privateEnter/emit_privateLogin/GetRoomPrivateMessages', sock
 router.get('/socket/privateEnter/emit_privateHistory/GetLatestPrivateMessages', socketControllerAPI.getLatestPrivateMessages)
 router.get('/socket/privateMessage/emit_privateMessage/SavePrivateMessages', socketControllerAPI.savePrivateMessages)
 router.get('/socket/privateMessage/emit_getRoomHistory/readPrivateMessages', socketControllerAPI.readPrivateMessages)
+router.get('/socket/privateMessage/emit_getRoomHistory/getUnReadCount', socketControllerAPI.getUnReadCount)
 
 module.exports = router
 

@@ -44,6 +44,17 @@ const socketController = {
         return messages
       })
   },
+  getUnReadCount: (UserId) => {
+    return PrivateMessage.findAll({
+      raw: true,
+      where: {
+        receiverId: UserId,
+        isRead: false
+      }
+    }).then(unreadMessages => {
+      return unreadMessages.length
+    })
+  },
   getRoomId: (data) => {   //建立新 private room
     let [id, id2] = [data.senderId, data.receiverId]
     const userArray = [id, id2]

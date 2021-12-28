@@ -20,8 +20,13 @@ module.exports = (server) => {
   io.on('connection', (socket) => {
     console.log('== connected! ===')
 
+    socket.on('unReadCount', async (UserId) => {  // 待確認
+      const unReadCount = await socketController.getUnReadCount(UserId)
+      socket.emit('unReadCount', unReadCount)
+    })
 
     socket.on("publicEnter", async (id) => {
+      console.log('== publicEnter! ===')
       socket.join('PublicRoom');
       // 回覆歷史訊息
       const history = await socketController.getPublicMessages()
@@ -158,6 +163,10 @@ module.exports = (server) => {
       io.to("User" + data.senderID).to("User" + data.receiverId).emit("privateMessage", newMessage);
       io.in(roomId).emit("privateMessage", newMessage);
       // socket.to(roomId).emit("privateMessage", newMessage);
+
+      // receiver 若在線上，但不在當下聊天室內，需要更新unReadCount
+      const unReadCount = await socketController.getUnReadCount(data.receiverId)
+      io.to("User" + data.receiverId).emit('unReadCount', unReadCount)
     });
 
 
