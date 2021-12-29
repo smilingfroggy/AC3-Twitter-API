@@ -8,41 +8,41 @@ const { Op, Sequelize } = require("sequelize");
 const socketController = {
   getUser: (UserId) => {
     return User.findByPk(UserId, {
-      attributes: ['id', 'name', 'avatar', 'account']
-    }).then(user => {
-      user = user.toJSON()
+      attributes: ["id", "name", "avatar", "account"],
+    }).then((user) => {
+      user = user.toJSON();
       // user.content = "上線"   // 由socket.js處理
       // user.type = "notice"    //已確認不寫入資料庫/歷史訊息不顯示notice(上下線訊息)
       // console.log(user)
-      return user
-    })
+      return user;
+    });
   },
   savePublicMessages: (data) => {
-    const { content, id } = data
+    const { content, id } = data;
     return Promise.all([
       PublicMessage.create({
-        content, UserId: id, type: "message" // type
+        content,
+        UserId: id,
+        type: "message", // type
       }),
       User.findByPk(id, {
-        attributes: ['id', 'name', 'avatar', 'account']
-      })
-    ])
-      .then(([newMessages, user]) => {
-        user = user.toJSON()
-        return ([newMessages, user])
-      })
+        attributes: ["id", "name", "avatar", "account"],
+      }),
+    ]).then(([newMessages, user]) => {
+      user = user.toJSON();
+      return [newMessages, user];
+    });
   },
   getPublicMessages: () => {
     return PublicMessage.findAll({
       raw: true,
       nest: true,
-      include: { model: User, attributes: ['id', 'name', 'avatar', 'account'] },
-      attributes: ['id', 'content', 'createdAt'],
-      order: [['createdAt', 'ASC']]
-    })
-      .then(messages => {
-        return messages
-      })
+      include: { model: User, attributes: ["id", "name", "avatar", "account"] },
+      attributes: ["id", "content", "createdAt"],
+      order: [["createdAt", "ASC"]],
+    }).then((messages) => {
+      return messages;
+    });
   },
   getUnReadCount: (UserId) => {
     return PrivateMessage.findAll({
@@ -63,12 +63,11 @@ const socketController = {
     return Room.findOrCreate({   //+ include user
       where: { UserId: id, UserId2: id2 }
     })
-      .then(room => { return room[0].id })
   },
   getAllUserRoomId: (UserId) => {
     return Room.findAll({
       raw: true,
-      attributes: ["id"],
+      // attributes: ["id"],
       where: { [Op.or]: [{ UserId }, { UserId2: UserId }] },
     }).then((rooms) => {
       return rooms.map(room => room.id)
@@ -153,4 +152,4 @@ const socketController = {
   }
 }
 
-module.exports = socketController
+module.exports = socketController;
