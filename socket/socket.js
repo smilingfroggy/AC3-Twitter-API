@@ -135,9 +135,9 @@ module.exports = (server) => {
           return { ..._room, receiver };
         })
       );
-      allRoomId.forEach((_room) => {
-        socket.join(_room.id);
-      });
+      // allRoomId.forEach((_room) => {
+      //   socket.join(_room.id);
+      // });
       console.log("allRoomIdWithReceiver", allRoomIdWithReceiver);
       const sockets = await io.in("User" + data.senderId).fetchSockets();
       console.log("joined socket.rooms: ", socket.rooms);
