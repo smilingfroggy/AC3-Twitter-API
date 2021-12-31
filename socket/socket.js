@@ -164,20 +164,18 @@ module.exports = (server) => {
       socket.emit('unReadCount', unReadCount)
     })
 
-    //data= userId1, userId2, content
+    //data= { senderId: NUMBER, receiverId: NUMBER, content: STRING }
     socket.on("privateMessage", async (data) => {
+      console.log('got privateMessage data: ', data)
       const roomId = await socketController.getRoomId(data)
-      const sender = await socketController.getUser(data.senderId)   //data 資料格式？假設{ senderId: NUMBER, receiverId: NUMBER, content: STRING}
-      const receiver = await socketController.getUser(data.receiverId)
       const newMessage = await socketController.savePrivateMessages(data, roomId)
-      // socket.to(roomId).emit("privateMessage", newMessage, roomId, sender, receiver);   //TODO 整理資料
+      console.log('RoomId:', roomId, 'has newMessage: ', newMessage)
 
-      console.log("sender", sender);
-      console.log(newMessage);
-      // io.to;
-      io.to("User" + data.senderID).to("User" + data.receiverId).emit("privateMessage", newMessage);
-      io.in(roomId).emit("privateMessage", newMessage);
-      // socket.to(roomId).emit("privateMessage", newMessage);
+      io.to("User" + data.senderId)
+        .to("User" + data.receiverId)
+        .emit("privateMessage", newMessage)
+      // receiver加入roomId(備案)
+      io.in("User" + data.receiverId).socketsJoin(roomId)
 
       // receiver 若在線上，但不在當下聊天室內，需要更新unReadCount
       const unReadCount = await socketController.getUnReadCount(data.receiverId)
