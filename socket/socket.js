@@ -133,20 +133,18 @@ module.exports = (server) => {
       })
       console.log("User", data.senderId, "joined socket.rooms: ", socket.rooms)
 
-      //  V3 - 取得使用者加入的所有歷史訊息----暫時不用
+      //  V3 - 取得使用者加入的所有歷史訊息
       const allPrivateHistory = await Promise.all(
-        allRoomId.map(async (_room) => {
-          const history = await socketController.getRoomPrivateMessages(_room)
-          return { roomId: _room, history }
+        allRoomIdWithReceiver.map(async (_room) => {
+          const history = await socketController.getRoomPrivateMessages(_room.id)
+          return { ..._room, history }
         })
       )
       socket.emit("privateHistory", allPrivateHistory)
 
-      
       // V2 - 取得使用者加入的每個Room的最新歷史訊息
       const latestPrivateHistory = await socketController.getLatestPrivateMessages(data.senderId)
       socket.emit("latestPrivateHistory", latestPrivateHistory)
-
     });
 
     socket.on("getRoomHistory", async (data) => { // 使用者點選私人訊息列表，需要知道登入使用者 data = { currentUserId, roomId }
