@@ -11,9 +11,6 @@ const socketController = {
       attributes: ['id', 'name', 'avatar', 'account']
     }).then(user => {
       user = user.toJSON()
-      // user.content = "上線"   // 由socket.js處理
-      // user.type = "notice"    //已確認不寫入資料庫/歷史訊息不顯示notice(上下線訊息)
-      // console.log(user)
       return user
     })
   },
@@ -61,17 +58,16 @@ const socketController = {
     userArray.sort((id, id2) => id - id2) // 改為升冪排序
 
     return Room.findOrCreate({   //+ include user
-      where: { UserId: id, UserId2: id2 }
+      where: { UserId: userArray[0], UserId2: userArray[1] }
     })
       .then(room => { return room[0].id })
   },
   getAllUserRoomId: (UserId) => {
     return Room.findAll({
       raw: true,
-      attributes: ["id"],
       where: { [Op.or]: [{ UserId }, { UserId2: UserId }] },
     }).then((rooms) => {
-      return rooms.map(room => room.id)
+      return rooms
     })
   },
   savePrivateMessages: (data, RoomId) => {

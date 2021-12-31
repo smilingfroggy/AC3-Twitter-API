@@ -107,14 +107,31 @@ module.exports = (server) => {
 
       // 加入所有所屬roomId
       const allRoomId = await socketController.getAllUserRoomId(data.senderId)
-      allRoomId.forEach( roomId => {
-        socket.join(roomId)
+      console.log("allRoomId", allRoomId)
+      const allRoomIdWithReceiver = await Promise.all(
+        allRoomId.map(async (_room) => {
+          console.log('_room', _room)
+          if (!_room.UserId || !_room.UserId2) {
+            console.log('return')
+            return;
+          } else if (_room.UserId === data.senderId) {
+            console.log('bequal')
+            let receiver = await socketController.getUser(_room.UserId2);
+            console.log('equal', receiver)
+            return { ..._room, receiver };
+          }
+          console.log('!bequal')
+          let receiver = await socketController.getUser(_room.UserId);
+          console.log('!equal', receiver)
+          return { ..._room, receiver }
+        })
+      );
+      console.log("allRoomIdWithReceiver", allRoomIdWithReceiver);
+
+      allRoomId.forEach(roomId => {
+        socket.join(roomId.id)
       })
-      // for (let id of allRoomId ) {
-      //   await socket.join(roomId)
-      // }
-      const sockets = await io.in("User" + data.senderId).fetchSockets();
-      console.log("joined socket.rooms: ", socket.rooms)
+      console.log("User", data.senderId, "joined socket.rooms: ", socket.rooms)
 
       //  V3 - 取得使用者加入的所有歷史訊息----暫時不用
       const allPrivateHistory = await Promise.all(

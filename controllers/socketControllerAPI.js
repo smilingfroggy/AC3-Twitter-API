@@ -51,20 +51,16 @@ const socketController = {
       })
   },
   getRoomId: (req, res) => {   //建立新 private room
-    const { userId, userId2 } = req.body
-    let UserId, UserId2
-    if (userId > userId2) {
-      [UserId, UserId2] = [userId2, userId]
-    } else {
-      [UserId, UserId2] = [userId, userId2]
-    }
+    const { senderId, receiverId } = req.body
+    let [id, id2] = [senderId, receiverId]
+    const userArray = [id, id2]
+    userArray.sort((id, id2) => id - id2) // 改為升冪排序[id, id2] / [id2, id]
+
     return Room.findOrCreate({   //+ include user
-      where: { UserId, UserId2 }
+      where: { UserId: userArray[0], UserId2: userArray[1] }
+    }).then(room => { // [ {room object}, Boolean(T:create;F:found)]
+      return res.json(room[0].id)
     })
-      .then(room => {   // [ {room object}, Boolean(T:create;F:found)]
-        // room = room.toJSON()    // TypeError: room.toJSON is not a function
-        return res.json(room[0].id)
-      })
   },
   getAllUserRoomId: (req, res) => {
     const { UserId } = req.body
