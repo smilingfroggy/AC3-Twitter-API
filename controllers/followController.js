@@ -16,6 +16,9 @@ const followController = {
     }).then(followship => {
       if (followship) {
         return res.json({ status: 'error', message: 'Followed already' })
+    }).then(([_followship, created]) => {
+      if (!created) {
+        return res.status(400).json({ status: 'error', message: '跟隨中' })
       }
       Followship.create({
         followerId: helpers.getUser(req).id,
@@ -23,6 +26,9 @@ const followController = {
       }).then(() => {
         return res.json({ status: 'success', message: 'Followed successfully' })
       })
+    }).catch(error => {
+      console.log(error)
+      return res.status(500).json({ status: 'error', message: '發生未預期錯誤，請重新嘗試' })
     })
   },
   deleteFollowship: (req, res) => {
@@ -35,9 +41,12 @@ const followController = {
       }
     }).then(followship => {
       if (!followship) {
-        return res.json({ status: 'error', message: 'Unfollowed already' })
+        return res.status(400).json({ status: 'error', message: '沒有跟隨' })
       }
       return res.json({ status: 'success', message: 'Unfollowed successfully' })
+    }).catch(error => {
+      console.log(error)
+      return res.status(500).json({ status: 'error', message: '發生未預期錯誤，請重新嘗試' })
     })
   }, getTopFollowers: (req, res) => {
     return User.findAll({
@@ -57,6 +66,9 @@ const followController = {
       users = users.sort((a, b) => b.FollowerCount - a.FollowerCount).slice(0, 10)
       users.forEach(user => {delete user.Followers})
       return res.json(users)
+    }).catch(error => {
+      console.log(error)
+      return res.status(500).json({ status: 'error', message: '發生未預期錯誤，請重新嘗試' })
     })
   }
 }

@@ -1,3 +1,4 @@
+const { Op, Sequelize } = require("sequelize")
 const bcrypt = require('bcryptjs')
 const db = require('../models')
 const helpers = require('../_helpers')
@@ -7,7 +8,6 @@ const Like = db.Like
 const Reply = db.Reply
 const Followship = db.Followship
 const imgur = require('imgur')
-
 
 // JWT
 const jwt = require('jsonwebtoken')
@@ -44,6 +44,9 @@ const userController = {
           id: user.id, name: user.name, account: user.account, email: user.email, role: user.role
         }
       })
+    }).catch(error => {
+      console.log(error)  //error.name, error.message
+      return res.status(500).json({ status: 'error', message: '發生未預期錯誤，請重新嘗試' })
     })
   },
   adminSignIn: (req, res) => {
@@ -74,6 +77,9 @@ const userController = {
           id: user.id, name: user.name, account: user.account, email: user.email, role: user.role
         }
       })
+    }).catch(error => {
+      console.log(error)
+      return res.status(500).json({ status: 'error', message: '發生未預期錯誤，請重新嘗試' })
     })
   },
   signUp: (req, res) => {
@@ -81,11 +87,11 @@ const userController = {
 
     // 確認欄位是否皆有填寫
     if (!account || !name || !email || !password || !checkPassword) {
-      return res.json({ status: 'error', message: '請輸入必填欄位!' })
+      return res.status(400).json({ status: 'error', message: '請輸入必填欄位!' })
     }
     // 確認密碼
     if (password !== checkPassword) {
-      return res.json({ status: 'error', message: '確認密碼輸入錯誤!' })
+      return res.status(400).json({ status: 'error', message: '確認密碼輸入錯誤!' })
     }
 
     // 確認email或account是否重複
@@ -114,6 +120,9 @@ const userController = {
           return res.json({ status: 'success', message: '成功註冊!' })
         })
       }
+    }).catch(error => {
+      console.log(error)
+      return res.status(500).json({ status: 'error', message: '發生未預期錯誤，請重新嘗試' })
     })
   },
   getUserAccountSetting: (req, res) => {
@@ -127,6 +136,9 @@ const userController = {
             email: user.email
           }
         })
+      }).catch(error => {
+        console.log(error)
+        return res.status(500).json({ status: 'error', message: '發生未預期錯誤，請重新嘗試' })
       })
   },
   putUserAccountSetting: (req, res) => {
@@ -135,11 +147,11 @@ const userController = {
 
     // 確認欄位是否皆有填寫
     if (!account || !name || !email || !password || !checkPassword) {
-      return res.json({ status: 'error', message: '請輸入必填欄位！' })
+      return res.status(400).json({ status: 'error', message: '請輸入必填欄位！' })
     }
     // 確認密碼
     if (password !== checkPassword) {
-      return res.json({ status: 'error', message: '確認密碼輸入錯誤!' })
+      return res.status(400).json({ status: 'error', message: '確認密碼輸入錯誤!' })
     }
 
     // 確認email或account是否重複
@@ -170,6 +182,9 @@ const userController = {
           return res.json({ status: 'success', message: '成功編輯' })
         })
       }
+    }).catch(error => {
+      console.log(error)
+      return res.status(500).json({ status: 'error', message: '發生未預期錯誤，請重新嘗試' })
     })
   },
   getCurrentUser: (req, res) => {
@@ -190,6 +205,9 @@ const userController = {
         { model: Tweet, attributes: ['id'] }
       ]
     }).then(user => {
+      if (!user) {
+        return res.status(400).json(({ status: 'error', message: '該使用者不存在' }))
+      }
       user = user.toJSON()
       user.FollowerCount = user.Followers.length //跟隨者人數
       user.FollowingCount = user.Followings.length //跟隨中人數
@@ -199,13 +217,18 @@ const userController = {
       delete user.Followings
       delete user.Tweets
       return res.json(user)
-    }
-    )
+    }).catch(error => {
+      console.log(error)
+      return res.status(500).json({ status: 'error', message: '發生未預期錯誤，請重新嘗試'})
+    })
   },
   getUserInfo: (req, res) => {
     const userId = helpers.getUser(req).id
     return User.findByPk(userId)
       .then(user => {
+        if (!user) {
+          return res.status(400).json(({ status: 'error', message: '該使用者不存在' }))
+        }
         return res.json({
           user: {
             name: user.name,
@@ -215,15 +238,17 @@ const userController = {
           }
         })
       })
+      .catch(error => {
+        console.log(error)
+        return res.status(500).json({ status: 'error', message: '發生未預期錯誤，請重新嘗試' })
+      })
   },
   editUserInfo: async (req, res) => {
-    const userId = helpers.getUser(req).id// {}
+    const userId = helpers.getUser(req).id
     const name = req.body.name
     // 確認name有填寫
     if (!name) {
-      return res.json({
-        status: 'error', message: '需填入姓名'
-      })
+      return res.status(400).json({ status: 'error', message: '需填入姓名' })
     }
 
     // 如果有上傳圖片，就上傳到imgur中
@@ -244,6 +269,10 @@ const userController = {
     return User.update({ ...req.body }, { where: { id: userId } })
       .then((user) => {
         return res.json({ status: 'success', message: '成功修改使用者Profile' })
+      })
+      .catch(error => {
+        console.log(error)
+        return res.status(500).json({ status: 'error', message: '發生未預期錯誤，請重新嘗試' })
       })
   },
 
@@ -275,6 +304,10 @@ const userController = {
         })
         return res.json(tweets)
       })
+      .catch(error => {
+        console.log(error)
+        return res.status(500).json({ status: 'error', message: '發生未預期錯誤，請重新嘗試' })
+      })
   },
   getOneRepliedTweets: (req, res) => {
     const UserId = req.params.id
@@ -288,6 +321,10 @@ const userController = {
     })
       .then(replies => {
         return res.json(replies)
+      })
+      .catch(error => {
+        console.log(error)
+        return res.status(500).json({ status: 'error', message: '發生未預期錯誤，請重新嘗試' })
       })
   },
   getOneTweets: (req, res) => {
@@ -312,6 +349,10 @@ const userController = {
         })
         return res.json(tweets)
       })
+      .catch(error => {
+        console.log(error)
+        return res.status(500).json({ status: 'error', message: '發生未預期錯誤，請重新嘗試' })
+      })
   },
   getOneFollowers: (req, res) => {
     const UserId = req.params.id
@@ -327,6 +368,9 @@ const userController = {
         followerId: user.Followship.followerId
       }))
       return res.json(users)
+    }).catch(error => {
+      console.log(error)
+      return res.status(500).json({ status: 'error', message: '發生未預期錯誤，請重新嘗試' })
     })
   },
   getOneFollowings: (req, res) => {
@@ -343,6 +387,9 @@ const userController = {
         followingId: user.Followship.followingId
       }))
       return res.json(users)
+    }).catch(error => {
+      console.log(error)
+      return res.status(500).json({ status: 'error', message: '發生未預期錯誤，請重新嘗試' })
     })
   },
 }

@@ -21,6 +21,9 @@ const likeController = {
         .then(like => {
           return res.json({ status: 'success', message: 'Like added' })
         })
+    }).catch(error => {
+      console.log(error)
+      return res.status(500).json({ status: 'error', message: '發生未預期錯誤，請重新嘗試' })
     })
 
   },
@@ -32,12 +35,15 @@ const likeController = {
       }
     }).then(like => {
       if (!like) {
-        return res.json({ status: 'error', message: "Haven't liked before" })
+        return res.status(400).json({ status: 'error', message: "尚未喜歡過此內容" })
       }
       like.destroy()
         .then(like => {
           return res.json({ status: 'success', message: 'Removed like successfully'})
         })
+    }).catch(error => {
+      console.log(error)
+      return res.status(500).json({ status: 'error', message: '發生未預期錯誤，請重新嘗試' })
     })
   }
 }

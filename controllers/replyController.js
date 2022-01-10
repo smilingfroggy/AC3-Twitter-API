@@ -1,5 +1,4 @@
 const db = require('../models')
-const Tweet = db.Tweet
 const User = db.User
 const Reply = db.Reply
 const helpers = require('../_helpers')
@@ -16,14 +15,17 @@ const replyController = {
         // delete reply.dataValues.User.password 無作用
       })
       return res.json(replies)
+    }).catch(error => {
+      console.log(error)
+      return res.status(500).json({ status: 'error', message: '發生未預期錯誤，請重新嘗試' })
     })
   },
   postReply: (req, res) => {
     if (!req.body.comment) {
-      return res.json({ status: 'error', message: 'No comment content' })
+      return res.status(400).json({ status: 'error', message: '請輸入回應內容' })
     }
     if (req.body.comment.length >= 280) {
-      return res.json({ status: 'error', message: 'Comment exceeds limit' })
+      return res.status(400).json({ status: 'error', message: '回應內容超過上限' })
     }
     Reply.create({
       TweetId: req.params.tweetId,
@@ -31,6 +33,9 @@ const replyController = {
       comment: req.body.comment
     }).then(() => {
       return res.json({ status: 'success', message: '' })
+    }).catch(error => {
+      console.log(error)
+      return res.status(500).json({ status: 'error', message: '發生未預期錯誤，請重新嘗試' })
     })
   }
 }

@@ -8,7 +8,6 @@ const replyController = require('../controllers/replyController')
 const likeController = require('../controllers/likeController')
 const followController = require('../controllers/followController')
 const adminController = require('../controllers/adminController')
-const socketController = require('../controllers/socketController')
 const socketControllerAPI = require('../controllers/socketControllerAPI')
 
 const multer = require('multer')
@@ -34,7 +33,7 @@ const authenticatedAdmin = (req, res, next) => {
     }
     return next()
   }
-  return res.json({ status: 'error', message: '請登入瀏覽網站' })
+  return res.status(401).json({ status: 'error', message: '請登入瀏覽網站' })
 }
 
 const authenticatedUser = (req, res, next) => {

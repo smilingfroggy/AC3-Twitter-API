@@ -1,8 +1,6 @@
 const db = require('../models')
 const Tweet = db.Tweet
 const User = db.User
-const Reply = db.Reply
-const Like = db.Like
 const helpers = require('../_helpers')
 
 const tweetController = {
@@ -31,6 +29,10 @@ const tweetController = {
         })
         res.json(tweets)
       })
+      .catch(error => {
+        console.log(error)
+        return res.status(500).json({ status: 'error', message: '發生未預期錯誤，請重新嘗試' })
+      })
   },
   getTweet: (req, res) => {
     Tweet.findByPk(req.params.id, {
@@ -40,10 +42,16 @@ const tweetController = {
         { model: User, as: 'RepliedUsers', attributes: ['id', 'name', 'account', 'avatar'] }
       ]
     }).then(tweet => {
+      if (!tweet) {
+        return res.status(400).json({ status: 'error', message: '該推文不存在' })
+      }
       tweet.dataValues.likedCount = tweet.LikedUsers.length
       tweet.dataValues.repliedCount = tweet.RepliedUsers.length
       tweet.dataValues.isLiked = helpers.getUser(req).LikedTweets ? helpers.getUser(req).LikedTweets.map(d => d.id).includes(tweet.id) : null
       return res.json(tweet)
+    }).catch(error => {
+      console.log(error)
+      return res.status(500).json({ status: 'error', message: '發生未預期錯誤，請重新嘗試' })
     })
   },
   postTweet: (req, res) => {
@@ -55,6 +63,9 @@ const tweetController = {
       UserId: helpers.getUser(req).id
     }).then(tweet => {
       return res.json({ status: 'success', message: "" })
+    }).catch(error => {
+      console.log(error)
+      return res.status(500).json({ status: 'error', message: '發生未預期錯誤，請重新嘗試' })
     })
   },
 }

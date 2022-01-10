@@ -28,6 +28,9 @@ const adminController = {
       users.forEach(user => { delete user.Tweets })
       users = users.sort((a, b) => b.TweetCount - a.TweetCount)
       return res.json(users)
+    }).catch(error => {
+      console.log(error)
+      return res.status(500).json({ status: 'error', message: '發生未預期錯誤，請重新嘗試' })
     })
   },
   getAdminTweets: (req, res) => {
@@ -42,6 +45,9 @@ const adminController = {
         User: tweet.User
       }))
       return res.json(tweets)
+    }).catch(error => {
+      console.log(error)
+      return res.status(500).json({ status: 'error', message: '發生未預期錯誤，請重新嘗試' })
     })
   },
   deleteTweet: (req, res) => {
@@ -56,7 +62,10 @@ const adminController = {
         if (tweet === 1) {  //確實有刪除成功
           return res.json({ status: 'success', message: '刪除成功' })
         } //tweet = 0 表示找不到推文
-        return res.json({ status: 'error', message: '推文不存在' })
+        return res.status(400).json({ status: 'error', message: '推文不存在' })
+      }).catch(error => {
+        console.log(error)
+        return res.status(500).json({ status: 'error', message: '發生未預期錯誤，請重新嘗試' })
       })
   }
 }
