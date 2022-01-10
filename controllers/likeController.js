@@ -1,46 +1,35 @@
 const db = require('../models')
-const User = db.User
 const Like = db.Like
 const helpers = require('../_helpers')
 
 const likeController = {
   postLike: (req, res) => {
-    Like.findOne({
-      where: { $and: {
-        UserId: helpers.getUser(req).id,
-        TweetId: req.params.tweetId,
-      }}
-    }).then(like => {
-      if (like) {
-        return res.json({ status: 'error', message: 'Like added already' })
-      }
-      Like.create({
+    Like.findOrCreate({
+      where: {
         UserId: helpers.getUser(req).id,
         TweetId: req.params.tweetId
-      })
-        .then(like => {
-          return res.json({ status: 'success', message: 'Like added' })
-        })
+      }
+    }).then(([like, created]) => {
+      if (!created) {
+        return res.status(400).json({ status: 'error', message: '已按過喜歡' })
+      }
+      return res.json({ status: 'success', message: '成功加入喜歡的推文' })
     }).catch(error => {
       console.log(error)
       return res.status(500).json({ status: 'error', message: '發生未預期錯誤，請重新嘗試' })
     })
-
   },
   postUnlike: (req, res) => {
-    Like.findOne({
+    Like.destroy({
       where: {
-          UserId: helpers.getUser(req).id,
-          TweetId: req.params.tweetId,
+        UserId: helpers.getUser(req).id,
+        TweetId: req.params.tweetId
       }
-    }).then(like => {
+    }).then(like => { //destroy count
       if (!like) {
         return res.status(400).json({ status: 'error', message: "尚未喜歡過此內容" })
       }
-      like.destroy()
-        .then(like => {
-          return res.json({ status: 'success', message: 'Removed like successfully'})
-        })
+      return res.json({ status: 'success', message: '已成功將此內容從喜歡的推文移除' })
     }).catch(error => {
       console.log(error)
       return res.status(500).json({ status: 'error', message: '發生未預期錯誤，請重新嘗試' })
