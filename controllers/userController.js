@@ -361,6 +361,9 @@ const userController = {
       include: { model: User, as: "Followers", attributes: ['id', 'name', 'account', 'introduction', 'avatar'] },
       order: [[User.associations.Followers, Followship, 'createdAt', 'DESC']],
     }).then(users => {
+      if (!users) {
+        return res.status(400).json(({ status: 'error', message: '該使用者不存在' }))
+      }
       users = users.Followers
       users = users.map((user) => ({
         ...user.dataValues,
@@ -380,6 +383,9 @@ const userController = {
       include: { model: User, as: "Followings", attributes: ['id', 'name', 'account', 'introduction', 'avatar'] },
       order: [[User.associations.Followings, Followship, 'createdAt', 'DESC']],
     }).then(users => {
+      if (!users) {
+        return res.status(400).json(({ status: 'error', message: '該使用者不存在' }))
+      }
       users = users.Followings
       users = users.map((user) => ({
         ...user.dataValues,
