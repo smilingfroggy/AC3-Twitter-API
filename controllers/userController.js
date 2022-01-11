@@ -113,7 +113,7 @@ const userController = {
       } else {
         User.create({
           account, email, name, role: null,
-          avatar: 'https://loremflickr.com/320/240/face',
+          avatar: 'https://i.imgur.com/tdi3NGa.png',
           cover: 'https://loremflickr.com/1200/400/landscape',
           password: bcrypt.hashSync(req.body.password, bcrypt.genSaltSync(10)),
         }).then(user => {

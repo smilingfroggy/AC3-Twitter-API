@@ -22,6 +22,8 @@ module.exports = {
         name: 'root',
         password: bcrypt.hashSync('12345678', bcrypt.genSaltSync(10), null),
         role: 'admin',
+        avatar: 'https://i.imgur.com/tdi3NGa.png',
+        cover: 'https://via.placeholder.com/1200x400',
         createdAt: new Date(),
         updatedAt: new Date()
       },
@@ -32,7 +34,7 @@ module.exports = {
         name: faker.name.findName(),
         avatar: `https://i.pravatar.cc/300?u=user${i+1}`,
         account: `user${i + 1}`,
-        cover: 'https://loremflickr.com/1200/400/landscape',
+        cover: `https://picsum.photos/seed/user${i+1}/1200/400`,
         introduction: faker.lorem.text(),
         createdAt: new Date(),
         updatedAt: new Date()
