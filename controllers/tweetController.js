@@ -1,6 +1,7 @@
 const db = require('../models')
 const Tweet = db.Tweet
 const User = db.User
+const Reply = db.Reply
 const helpers = require('../_helpers')
 
 const tweetController = {
@@ -10,21 +11,21 @@ const tweetController = {
         // User,   // Tweet belongsTo User
         { model: User, as: 'User', attributes: ['id', 'name', 'account', 'avatar'] },
         { model: User, as: 'LikedUsers', attributes: ['id', 'name', 'account', 'avatar'] },    // Tweet belongsToMany User, through Like
-        { model: User, as: 'RepliedUsers', attributes: ['id', 'name', 'account', 'avatar'] }   // Tweet belongsToMany User, through Reply; 包含Reply內容
+        Reply
       ],
       order: [['createdAt', 'DESC']]
     })
       .then(tweets => {
         const isLiked = helpers.getUser(req).LikedTweets ? helpers.getUser(req).LikedTweets.map(d => d.id).includes(tweets.id) : null
-        
+
         tweets = tweets.map(tweet => ({
           ...tweet.dataValues,
-          repliedCount: tweet.RepliedUsers.length,
+          repliedCount: tweet.Replies.length,
           likedCount: tweet.LikedUsers.length,
           isLiked: isLiked
         }))
         tweets.forEach(tweet => {
-          delete tweet.RepliedUsers
+          delete tweet.Replies
           delete tweet.LikedUsers
         })
         res.json(tweets)
@@ -39,15 +40,17 @@ const tweetController = {
       include: [
         { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
         { model: User, as: 'LikedUsers', attributes: ['id', 'name', 'account', 'avatar'] },
-        { model: User, as: 'RepliedUsers', attributes: ['id', 'name', 'account', 'avatar'] }
+        Reply
       ]
     }).then(tweet => {
       if (!tweet) {
         return res.status(400).json({ status: 'error', message: '該推文不存在' })
       }
       tweet.dataValues.likedCount = tweet.LikedUsers.length
-      tweet.dataValues.repliedCount = tweet.RepliedUsers.length
+      tweet.dataValues.repliedCount = tweet.Replies.length
       tweet.dataValues.isLiked = helpers.getUser(req).LikedTweets ? helpers.getUser(req).LikedTweets.map(d => d.id).includes(tweet.id) : null
+      delete tweet.dataValues.Replies
+      delete tweet.dataValues.LikedUsers
       return res.json(tweet)
     }).catch(error => {
       console.log(error)

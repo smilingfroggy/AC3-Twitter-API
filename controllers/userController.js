@@ -287,19 +287,19 @@ const userController = {
         model: Tweet, attributes: ['id', 'description', 'createdAt'], include: [
           { model: User, attributes: ['id', 'name', 'account', 'avatar'] },
           { model: User, as: 'LikedUsers', attributes: ['id'] },
-          { model: User, as: 'RepliedUsers', attributes: ['id'] }
+          Reply
         ]
       }
     })
       .then((tweets) => {
         tweets = tweets.map(tweet => ({
           ...tweet.dataValues,
-          repliedCount: tweet.Tweet.RepliedUsers.length,
+          repliedCount: tweet.Tweet.Replies.length,
           likedCount: tweet.Tweet.LikedUsers.length,
           isLiked: helpers.getUser(req).LikedTweets ? helpers.getUser(req).LikedTweets.map(d => d.id).includes(tweet.id) : null
         }))
         tweets.forEach(tweet => {
-          delete tweet.Tweet.dataValues.RepliedUsers
+          delete tweet.Tweet.dataValues.Replies
           delete tweet.Tweet.dataValues.LikedUsers
         })
         return res.json(tweets)
@@ -334,17 +334,18 @@ const userController = {
       order: [['createdAt', 'DESC']],
       include: [
         { model: User, as: 'LikedUsers', attributes: ['id'] },
-        { model: User, as: 'RepliedUsers', attributes: ['id'] }]
+        Reply
+      ]
     })
       .then(tweets => {
         tweets = tweets.map(tweet => ({
           ...tweet.dataValues,
-          repliedCount: tweet.RepliedUsers.length,
+          repliedCount: tweet.Replies.length,
           likedCount: tweet.LikedUsers.length,
           isLiked: helpers.getUser(req).LikedTweets ? helpers.getUser(req).LikedTweets.map(d => d.id).includes(tweet.id) : null
         }))
         tweets.forEach(tweet => {
-          delete tweet.RepliedUsers
+          delete tweet.Replies
           delete tweet.LikedUsers
         })
         return res.json(tweets)
