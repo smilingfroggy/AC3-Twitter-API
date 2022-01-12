@@ -16,13 +16,11 @@ const tweetController = {
       order: [['createdAt', 'DESC']]
     })
       .then(tweets => {
-        const isLiked = helpers.getUser(req).LikedTweets ? helpers.getUser(req).LikedTweets.map(d => d.id).includes(tweets.id) : null
-
         tweets = tweets.map(tweet => ({
           ...tweet.dataValues,
           repliedCount: tweet.Replies.length,
           likedCount: tweet.LikedUsers.length,
-          isLiked: isLiked
+          isLiked: helpers.getUser(req).LikedTweets ? helpers.getUser(req).LikedTweets.map(d => d.id).includes(tweet.id) : null
         }))
         tweets.forEach(tweet => {
           delete tweet.Replies

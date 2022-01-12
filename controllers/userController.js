@@ -298,7 +298,7 @@ const userController = {
           ...tweet.dataValues,
           repliedCount: tweet.Tweet.Replies.length,
           likedCount: tweet.Tweet.LikedUsers.length,
-          isLiked: helpers.getUser(req).LikedTweets ? helpers.getUser(req).LikedTweets.map(d => d.id).includes(tweet.id) : null
+          isLiked: helpers.getUser(req).LikedTweets ? helpers.getUser(req).LikedTweets.map(d => d.id).includes(tweet.Tweet.id) : null
         }))
         tweets.forEach(tweet => {
           delete tweet.Tweet.dataValues.Replies
