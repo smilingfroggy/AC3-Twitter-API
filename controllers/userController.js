@@ -265,6 +265,8 @@ const userController = {
         const cover = await imgur.uploadFile(files.cover[0].path)
         req.body.cover = cover.link
       }
+    } if (req.body.noCover) {
+      req.body.cover = req.body.noCover;
     }
     return User.update({ ...req.body }, { where: { id: userId } })
       .then((user) => {
